@@ -1,0 +1,50 @@
+$border-style = 2px solid black
+$border-radius = 5px
+
+// Left
+
+.card-left .card-action {
+  border: $border-style
+  border-radius: $border-radius 0px 0px $border-radius
+}
+
+.card-outside-left {
+  border: $border-style
+  border-radius: 0px $border-radius $border-radius 0px
+  background-color: red
+}
+
+// Center
+
+.card-center .card-action {
+  border-top: $border-style
+  border-bottom: $border-style
+}
+
+.card-outside-center {
+  border: $border-style
+  background-color: green
+}
+
+// Right
+
+.card-outside-right {
+  border: $border-style
+  border-radius: $border-radius 0px 0px $border-radius
+  background-color: blue
+}
+
+.card-right .card-action {
+  border: $border-style
+  border-radius: 0px $border-radius $border-radius 0px
+}
+
+// Actions
+
+.card-null-action {
+  background-color: grey
+}
+
+.card-active-action {
+  background-color: yellow
+}

@@ -2,12 +2,13 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { AppContainer } from 'react-hot-loader'
 
-import './index.styl'
-
 import { deepMap } from './util'
 
 import App from 'components/App'
-import game from './game'
+import game from 'game'
+
+import './index.styl'
+import 'game/index.styl'
 
 ReactDOM.render(
   <AppContainer>

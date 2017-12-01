@@ -24,8 +24,6 @@ export default class TripticCard extends React.Component {
     this.handleOpen = this.handleOpen.bind(this)
     this.handleAction = this.handleAction.bind(this)
     this.handleCardAnimationEnd = this.handleCardAnimationEnd.bind(this)
-    this.handleLeftAnimationEnd = this.handleLeftAnimationEnd.bind(this)
-    this.handleRightAnimationEnd = this.handleRightAnimationEnd.bind(this)
   }
 
   handleOpen() {
@@ -52,40 +50,12 @@ export default class TripticCard extends React.Component {
   }
 
   handleCardAnimationEnd(e) {
-    const { state, onDrawn, onDiscarded, onRemoved } = this.props
+    const { state, onEnd } = this.props
 
-    if (e.animationName === 'draw') {
-      onDrawn()
-    } else if (e.animationName === 'discard') {
-      onDiscarded()
+    if (e.animationName === 'discard') {
+      onEnd('discard')
     } else if (e.animationName === 'remove') {
-      onRemoved()
-    }
-  }
-
-  handleLeftAnimationEnd() {
-    const { data, state, onClosed } = this.props
-
-    if (state === 'action-right') {
-      if (data.actions.length === 2) {
-        onClosed(2, data.actions[1])
-      } else if (data.actions.length === 3) {
-        onClosed(2, data.actions[2])
-      }
-    }
-  }
-
-  handleRightAnimationEnd() {
-    const { data, state, onClosed } = this.props
-
-    if (state === 'action-left') {
-      onClosed(0, data.actions[0])
-    } else if (state === 'action-center') {
-      if (data.actions.length === 1) {
-        onClosed(1, data.actions[0])
-      } else if (data.actions.length === 3) {
-        onClosed(1, data.actions[1])
-      }
+      onEnd('removed')
     }
   }
 
@@ -104,49 +74,46 @@ export default class TripticCard extends React.Component {
       actions = data.actions
     }
 
+    const stateClasses = {
+      'card-drawing': state === 'drawing',
+      'card-open': state === 'open',
+      'card-closing-left': state === 'discarding-left' || state === 'discarding-center' || state === 'removing-left' || state === 'removing-center',
+      'card-closing-right': state === 'discarding-right' || state === 'removing-right',
+      'card-discarding': state === 'discarding-left' || state === 'discarding-center' || state === 'discarding-right',
+      'card-removing': state === 'removing-left' || state === 'removing-center' || state === 'removing-right',
+    }
+
     return <div
-      className={cx(
-        'card',
-        {
-          'card-drawing': state === 'drawing',
-          'card-closed': state === 'closed',
-          'card-open': state === 'open',
-          'card-closing-left': state === 'action-left' || state === 'action-center',
-          'card-closing-right': state === 'action-right',
-          'card-discarding-left': state === 'discarding-left' || state === 'discarding-center',
-          'card-discarding-right': state === 'discarding-right',
-          'card-removing-left': state === 'removing-left' || state === 'removing-center',
-          'card-removing-right': state === 'removing-right',
-        }
-      )}
+      className={cx('card-container', stateClasses)}
       onAnimationEnd={this.handleCardAnimationEnd}
     >
-      <div className='card-left'>
-        <Action action={actions[0]} onClick={() => this.handleAction(0)} />
-      </div>
-
-      <div className='card-center'>
-        <div className='card-face card-outside-left'
-          onClick={state === 'closed' ? this.handleOpen : null}
-          onAnimationEnd={this.handleLeftAnimationEnd}
-        >
-          <div>{title}</div>
-          <div>{data.text}</div>
+      <div className={cx('card', stateClasses)}>
+        <div className='card-left'>
+          <Action action={actions[0]} onClick={() => this.handleAction(0)} />
         </div>
 
-        <div className='card-face card-outside-right' onAnimationEnd={this.handleRightAnimationEnd}>
-          OUTSIDE RIGHT
+        <div className='card-center'>
+          <div className='card-face card-outside-left'
+            onClick={state === 'drawing' ? this.handleOpen : null}
+          >
+            <div>{title}</div>
+            <div>{data.text}</div>
+          </div>
+
+          <div className='card-face card-outside-right'>
+            OUTSIDE RIGHT
+          </div>
+
+          <div className='card-face card-outside-center'>
+            OUTSIDE CENTER
+          </div>
+
+          <Action action={actions[1]} onClick={state === 'open' ? () => this.handleAction(1) : null} />
         </div>
 
-        <div className='card-face card-outside-center'>
-          OUTSIDE CENTER
+        <div className='card-right'>
+          <Action action={actions[2]} onClick={state === 'open' ? () => this.handleAction(2) : null} />
         </div>
-
-        <Action action={actions[1]} onClick={state === 'open' ? () => this.handleAction(1) : null} />
-      </div>
-
-      <div className='card-right'>
-        <Action action={actions[2]} onClick={state === 'open' ? () => this.handleAction(2) : null} />
       </div>
     </div>
   }

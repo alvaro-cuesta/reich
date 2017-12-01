@@ -9,12 +9,9 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
 
-    this.handleDrawn = this.handleDrawn.bind(this)
     this.handleClickOpen = this.handleClickOpen.bind(this)
     this.handleAction = this.handleAction.bind(this)
-    this.handleClosed = this.handleClosed.bind(this)
-    this.handleDiscarded = this.handleDiscarded.bind(this)
-    this.handleRemoved = this.handleRemoved.bind(this)
+    this.handleEnd = this.handleEnd.bind(this)
 
     const { game } = this.props
     const globals = {}, hand = [], deck = [], discard = [], removed = []
@@ -34,10 +31,6 @@ export default class App extends React.Component {
     }
   }
 
-  handleDrawn() {
-    this.setState({ boardState: 'closed' })
-  }
-
   handleClickOpen() {
     this.setState({ boardState: 'open' })
   }
@@ -51,22 +44,6 @@ export default class App extends React.Component {
       }
     }
 
-    let boardState
-    switch (i) {
-    case 0:
-      boardState = 'action-left'
-      break
-    case 1:
-      boardState = 'action-center'
-      break
-    case 2:
-      boardState = 'action-right'
-    }
-
-    this.setState({ hand, deck, discard, removed, boardCard, boardState })
-  }
-
-  handleClosed(i, action) {
     let sendTo
     switch (action.actions.send) {
     case 'removed':
@@ -77,37 +54,32 @@ export default class App extends React.Component {
       sendTo = 'discarding'
     }
 
+    let boardState
     switch (i) {
     case 0:
-      this.setState({ boardState: `${sendTo}-left` })
+      boardState = `${sendTo}-left`
       break
     case 1:
-      this.setState({ boardState: `${sendTo}-center` })
+      boardState = `${sendTo}-center`
       break
     case 2:
-      this.setState({ boardState: `${sendTo}-right` })
-    }
-  }
-
-  handleDiscarded() {
-    let { deck, discard, boardCard } = this.state
-
-    discard.push(boardCard)
-
-    if (deck.length === 0) {
-      deck = shuffle(discard)
-      discard = []
+      boardState = `${sendTo}-right`
     }
 
-    boardCard = deck.pop()
-
-    this.setState({ deck, discard, boardCard, boardState: 'drawing' })
+    this.setState({ hand, deck, discard, removed, boardCard, boardState })
   }
 
-  handleRemoved() {
+  handleEnd(sendTo) {
     let { deck, discard, removed, boardCard } = this.state
 
-    removed.push(boardCard)
+    switch (sendTo) {
+    case 'removed':
+      removed.push(boardCard)
+      break
+    default:
+    case 'discard':
+      discard.push(boardCard)
+    }
 
     if (deck.length === 0) {
       deck = shuffle(discard)
@@ -138,17 +110,12 @@ export default class App extends React.Component {
       </header>
 
       <main>
-        <div className='card-container'>
-          <TripticCard title={boardCard} data={game.cards[boardCard]}
-            state={boardState}
-            onDrawn={this.handleDrawn}
-            onClickOpen={this.handleClickOpen}
-            onAction={this.handleAction}
-            onClosed={this.handleClosed}
-            onDiscarded={this.handleDiscarded}
-            onRemoved={this.handleRemoved}
-          />
-        </div>
+        <TripticCard title={boardCard} data={game.cards[boardCard]}
+          state={boardState}
+          onClickOpen={this.handleClickOpen}
+          onAction={this.handleAction}
+          onEnd={this.handleEnd}
+        />
 
         <div>
           {handResources}
