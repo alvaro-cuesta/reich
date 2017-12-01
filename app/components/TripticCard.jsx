@@ -89,10 +89,6 @@ export default class TripticCard extends React.Component {
     >
       <div className={cx('card', stateClasses)}>
         <div className='card-left'>
-          <Action action={actions[0]} onClick={() => this.handleAction(0)} />
-        </div>
-
-        <div className='card-center'>
           <div className='card-face card-outside-left'
             onClick={state === 'drawing' ? this.handleOpen : null}
           >
@@ -100,10 +96,10 @@ export default class TripticCard extends React.Component {
             <div>{data.text}</div>
           </div>
 
-          <div className='card-face card-outside-right'>
-            OUTSIDE RIGHT
-          </div>
+          <Action action={actions[0]} onClick={() => this.handleAction(0)} />
+        </div>
 
+        <div className='card-center'>
           <div className='card-face card-outside-center'>
             OUTSIDE CENTER
           </div>
@@ -112,6 +108,10 @@ export default class TripticCard extends React.Component {
         </div>
 
         <div className='card-right'>
+          <div className='card-face card-outside-right'>
+            OUTSIDE RIGHT
+          </div>
+
           <Action action={actions[2]} onClick={state === 'open' ? () => this.handleAction(2) : null} />
         </div>
       </div>
