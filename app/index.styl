@@ -1,0 +1,411 @@
+$card-width = 5em
+$card-height = $card-width * 1.61803398875
+$open-duration = 500ms
+$open-wait = 250ms
+$border-radius = 5px
+
+* { box-sizing: border-box }
+
+body {
+  text-rendering: optimizeLegibility
+}
+
+.card {
+  width: $card-width * 3
+
+  display: flex
+  flex-direction: row
+}
+
+.card.card-drawing {
+  animation: draw 1s ease-out 0s 1 normal forwards running
+
+  .card-outside-center {
+    transform: rotateY(180deg)
+    z-index: 1000
+  }
+
+  .card-left .card-action {
+    transform: rotateY(180deg)
+  }
+
+  .card-outside-left {
+    cursor: pointer
+    z-index: 100
+  }
+
+  .card-right .card-action {
+    transform: rotateY(-180deg)
+  }
+}
+
+.card.card-discarding-left, .card.card-discarding-right {
+  animation: discard 1s ease-out 0s 1 normal forwards running
+}
+
+.card.card-discarding-left {
+  .card-outside-center {
+    transform: rotateY(180deg)
+    z-index: 1000
+  }
+
+  .card-left .card-action {
+    transform: rotateY(180deg)
+  }
+
+  .card-outside-left {
+    z-index: 50
+  }
+
+  .card-outside-right {
+    transform: rotateY(0deg)
+    z-index: 100
+  }
+
+  .card-right .card-action {
+    transform: rotateY(-180deg)
+  }
+}
+
+.card.card-discarding-right {
+  .card-outside-center {
+    transform: rotateY(180deg)
+    z-index: 1000
+  }
+
+  .card-left .card-action {
+    transform: rotateY(180deg)
+  }
+
+  .card-outside-left {
+    cursor: pointer
+    z-index: 100
+  }
+
+  .card-outside-right {
+    transform: rotateY(0deg)
+    z-index: 50
+  }
+
+  .card-right .card-action {
+    transform: rotateY(-180deg)
+  }
+}
+
+.card.card-removing-left, .card.card-removing-right {
+  animation: remove 1s ease-out 0s 1 normal forwards running
+}
+
+.card.card-removing-left {
+  .card-outside-center {
+    transform: rotateY(180deg)
+    z-index: 1000
+  }
+
+  .card-left .card-action {
+    transform: rotateY(180deg)
+  }
+
+  .card-outside-left {
+    z-index: 50
+  }
+
+  .card-outside-right {
+    transform: rotateY(0deg)
+    z-index: 100
+  }
+
+  .card-right .card-action {
+    transform: rotateY(-180deg)
+  }
+}
+
+.card.card-removing-right {
+  .card-outside-center {
+    transform: rotateY(180deg)
+    z-index: 1000
+  }
+
+  .card-left .card-action {
+    transform: rotateY(180deg)
+  }
+
+  .card-outside-left {
+    cursor: pointer
+    z-index: 100
+  }
+
+  .card-outside-right {
+    transform: rotateY(0deg)
+    z-index: 50
+  }
+
+  .card-right .card-action {
+    transform: rotateY(-180deg)
+  }
+}
+
+.card.card-closed {
+  .card-outside-center {
+    transform: rotateY(180deg)
+    z-index: 1000
+  }
+
+  .card-left .card-action {
+    transform: rotateY(180deg)
+  }
+
+  .card-outside-left {
+    cursor: pointer
+    z-index: 100
+  }
+
+  .card-right .card-action {
+    transform: rotateY(-180deg)
+  }
+}
+
+.card.card-open {
+  .card-left .card-action {
+    transform: rotateY(180deg)
+    animation: unflip-left $open-duration ease-out 0s 1 normal forwards running
+  }
+
+  .card-outside-left {
+    transform: rotateY(0deg)
+    animation: flip-left $open-duration ease-out 0s 1 normal forwards running
+    z-index: 100
+  }
+
+  .card-outside-right {
+    transform: rotateY(0deg)
+    animation: flip-right $open-duration ease-out $open-wait 1 normal forwards running
+    z-index: 50
+  }
+
+  .card-right .card-action {
+    transform: rotateY(-180deg)
+    animation: unflip-right $open-duration ease-out $open-wait 1 normal forwards running
+  }
+}
+
+.card.card-closing-left {
+  .card-left .card-action {
+    transform: rotateY(0deg)
+    animation: flip-right $open-duration ease-out 0s 1 normal forwards running
+  }
+
+  .card-outside-left {
+    transform: rotateY(180deg)
+    animation: unflip-right $open-duration ease-out 0s 1 normal forwards running
+    z-index: 50
+  }
+
+  .card-outside-right {
+    transform: rotateY(-180deg)
+    animation: unflip-left $open-duration ease-out $open-wait 1 normal forwards running
+    z-index: 100
+  }
+
+  .card-right .card-action {
+    transform: rotateY(0deg)
+    animation: flip-left $open-duration ease-out $open-wait 1 normal forwards running
+  }
+}
+
+.card.card-closing-right {
+  .card-left .card-action {
+    transform: rotateY(0deg)
+    animation: flip-right $open-duration ease-out $open-wait 1 normal forwards running
+  }
+
+  .card-outside-left {
+    transform: rotateY(180deg)
+    animation: unflip-right $open-duration ease-out $open-wait 1 normal forwards running
+    z-index: 100
+  }
+
+  .card-outside-right {
+    transform: rotateY(-180deg)
+    animation: unflip-left $open-duration ease-out 0ms 1 normal forwards running
+    z-index: 50
+  }
+
+  .card-right .card-action {
+    transform: rotateY(0deg)
+    animation: flip-left $open-duration ease-out 0ms 1 normal forwards running
+  }
+}
+
+.card-left, .card-center, .card-right {
+  width: $card-width
+  height: $card-height
+
+  position: relative
+  top: 0
+}
+
+.card-face {
+  width: 100%
+  height: 100%
+
+  backface-visibility: hidden
+
+  position: absolute
+  top: 0
+  left: 0
+}
+
+.card-outside-left {
+  border: 2px solid black
+  border-radius: 0px $border-radius $border-radius 0px
+
+  background-color: red
+
+  transform-origin: 0% 50%
+}
+
+.card-outside-center {
+  border: 2px solid black
+
+  background-color: green
+}
+
+.card-left .card-action {
+  border: 2px solid black
+  border-radius: $border-radius 0px 0px $border-radius
+
+  transform-origin: 100% 50%
+}
+
+.card-outside-right {
+  border: 2px solid black
+  border-radius: $border-radius 0px 0px $border-radius
+
+  background-color: blue
+
+  transform-origin: 100% 50%
+}
+
+.card-right .card-action {
+  border: 2px solid black
+  border-radius: 0px $border-radius $border-radius 0px
+
+  transform-origin: 0% 50%
+}
+
+.card-center .card-action {
+  border-top: 2px solid black
+  border-bottom: 2px solid black
+}
+
+.card-action {
+  display: flex
+  flex-direction: column
+
+  z-index: 0
+}
+
+.card-action-row {
+  height: 33%
+}
+
+.card-active-action {
+  cursor: pointer
+  background-color: yellow
+}
+
+.card-null-action {
+  background-color: grey
+}
+
+.card-container {
+  transform-style: preserve-3d
+  perspective: 500px
+  width: $card-width * 3
+  transform-origin: 50% 50% 0%
+}
+
+.card {
+  transform-style: preserve-3d
+}
+
+.card-face {
+  transform-style: preserve-3d
+}
+
+@keyframes draw {
+  0% {
+    transform: translate3d(-100px, 0px, 0px) rotateY(180deg)
+  }
+  40% {
+    transform: translate3d(-10px, 0px, 100px) rotateY(180deg)
+  }
+  50% {
+    transform: translate3d(-10px, 0px, 100px) rotateY(180deg)
+  }
+  100% {
+    transform: translate3d(0px, 0px, 0px) rotateY(0deg)
+  }
+}
+
+@keyframes discard {
+  0% {
+    transform: translate3d(0px, 0px, 0px) rotateY(0deg)
+  }
+  40% {
+    transform: translate3d(10px, 0px, 100px) rotateY(180deg)
+  }
+  50% {
+    transform: translate3d(10px, 0px, 100px) rotateY(180deg)
+  }
+  100% {
+    transform: translate3d(100px, 0px, 0px) rotateY(180deg)
+  }
+}
+
+@keyframes remove {
+  0% {
+    opacity: 1
+  }
+  100% {
+    opacity: 0
+  }
+}
+
+@keyframes unflip-left {
+  from {
+    transform: rotateY(180deg)
+  }
+  to {
+    transform: rotateY(0deg)
+  }
+}
+
+@keyframes flip-left {
+  from {
+    transform: rotateY(0deg)
+  }
+  to {
+    transform: rotateY(-180deg)
+  }
+}
+
+
+@keyframes flip-right {
+  from {
+    transform: rotateY(0deg)
+  }
+  to {
+    transform: rotateY(180deg)
+  }
+}
+
+@keyframes unflip-right {
+  from {
+    transform: rotateY(-180deg)
+  }
+  to {
+    transform: rotateY(0deg)
+  }
+}
