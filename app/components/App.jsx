@@ -66,15 +66,17 @@ export default class App extends React.Component {
   }
 
   handleClickOpen() {
+    let { state } = this.state
+
     if (state !== 'drawing') return
 
     this.setState({ state: 'opening' })
   }
 
   handleAction(i, action) {
-    if (state !== 'opening') return
+    let { hand, deck, discard, removed, boardCard, state } = this.state
 
-    let { hand, deck, discard, removed, boardCard } = this.state
+    if (state !== 'opening') return
 
     if (typeof action.cost !== 'undefined' && action.cost.length > 0) {
       for (let resource of action.cost) {
