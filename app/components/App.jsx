@@ -148,7 +148,7 @@ export default class App extends React.Component {
                   onClickOpen={this.handleClickOpen}
                   onAction={this.handleAction}
                 />
-              : <div className='card-placeholder-hack' />
+              : null
             }
           </div>
 
