@@ -47,13 +47,13 @@ switch(process.env.npm_lifecycle_event) {
       parts.productionSourceMap(),
       parts.productionEnv(),
       parts.extractVendor([
-        'brace/mode/javascript',
+        /*'brace/mode/javascript',
         'brace/theme/tomorrow_night_eighties',
         'brace/ext/error_marker',
         'brace/ext/searchbox',
         'brace/ext/elastic_tabstops_lite',
         'brace/ext/keybinding_menu',
-        'brace/ext/settings_menu'
+        'brace/ext/settings_menu'*/
       ]),
       parts.extractStyles({css: false, stylus: true}),
       parts.clean(PATHS.build),
@@ -68,13 +68,13 @@ switch(process.env.npm_lifecycle_event) {
       parts.productionSourceMap(),
       parts.productionEnv(),
       parts.extractVendor([
-        'brace/mode/javascript',
+        /*'brace/mode/javascript',
         'brace/theme/tomorrow_night_eighties',
         'brace/ext/error_marker',
         'brace/ext/searchbox',
         'brace/ext/elastic_tabstops_lite',
         'brace/ext/keybinding_menu',
-        'brace/ext/settings_menu'
+        'brace/ext/settings_menu'*/
       ]),
       parts.extractStyles({css: false, stylus: true}),
       parts.clean(PATHS.build),

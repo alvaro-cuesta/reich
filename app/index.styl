@@ -261,8 +261,10 @@ body {
 }
 
 @keyframes shuffle {
-  from { transform: translateX(0px) }
-  to { transform: translateX(-100px) }
+  0% { transform: translateX(0px) }
+  50% { transform: translateX($card-margin * -1 + $card-width * -2) }
+  90% { transform: translateX($card-margin * -2 + $card-width * -4) }
+  100% { transform: translateX($card-margin * -2 + $card-width * -4) }
 }
 
 // Flips
