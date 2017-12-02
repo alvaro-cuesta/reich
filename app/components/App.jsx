@@ -11,6 +11,7 @@ export default class App extends React.Component {
     super(props)
 
     this.handleDeckAnimationEnd = this.handleDeckAnimationEnd.bind(this)
+    this.handleDiscardAnimationEnd = this.handleDiscardAnimationEnd.bind(this)
     this.handleCardAnimationEnd = this.handleCardAnimationEnd.bind(this)
     this.handleClickOpen = this.handleClickOpen.bind(this)
     this.handleAction = this.handleAction.bind(this)
@@ -40,6 +41,17 @@ export default class App extends React.Component {
     }
   }
 
+  handleDiscardAnimationEnd({ animationName }) {
+    let { deck, discard } = this.state
+
+    if (animationName === 'shuffle') {
+      deck = shuffle(discard)
+      discard = []
+
+      this.setState({ deck, discard, state: 'moving' })
+    }
+  }
+
   handleCardAnimationEnd({ animationName }) {
     let { deck, discard, removed, boardCard } = this.state
 
@@ -58,11 +70,10 @@ export default class App extends React.Component {
     }
 
     if (deck.length === 0) {
-      deck = shuffle(discard)
-      discard = []
+      this.setState({ discard, removed, boardCard: null, state: 'shuffling' })
+    } else {
+      this.setState({ discard, removed, boardCard: null, state: 'moving' })
     }
-
-    this.setState({ deck, discard, removed, boardCard: null, state: 'moving' })
   }
 
   handleClickOpen() {
@@ -138,9 +149,7 @@ export default class App extends React.Component {
             }
           </div>
 
-          <div className='card-container'
-            onAnimationEnd={this.handleCardAnimationEnd}
-          >
+          <div className='card-container' onAnimationEnd={this.handleCardAnimationEnd}>
             {
               boardCard !== null
               ? <TripticCard title={boardCard} data={game.cards[boardCard]}
@@ -152,7 +161,21 @@ export default class App extends React.Component {
             }
           </div>
 
-          <div className='discard'>
+          <div className='discard' onAnimationEnd={this.handleDiscardAnimationEnd}>
+            {
+              discard.length > 2
+              ? <div className='card-lone'>
+                  <BackFace />
+                </div>
+              : null
+            }
+            {
+              discard.length > 1
+              ? <div className='card-lone'>
+                  <BackFace />
+                </div>
+              : null
+            }
             {
               discard.length > 0
               ? <div className='card-lone'>

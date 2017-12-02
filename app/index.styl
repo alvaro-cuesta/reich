@@ -6,6 +6,7 @@ $draw-duration = 1s
 $open-duration = 500ms
 $open-wait = 250ms
 $end-duration = 1s
+$discard-duration = 3s
 $card-draw-height = 60px
 $card-margin = 1em
 $deck-shown = $card-width * 2/5
@@ -29,7 +30,7 @@ body {
   transform: translateX($card-width * -1 - $card-margin + $deck-shown)
 }
 
-.card-container, .card-placeholder-hack {
+.card-container {
   perspective: 500px
   width: $card-width * 3
   margin: 0 $card-margin
@@ -185,13 +186,17 @@ body {
 .board.state-discarding-left .card,
 .board.state-discarding-center .card,
 .board.state-discarding-right .card {
-  animation: discard $end-duration  ease-out ($open-duration + $open-wait) 1 normal forwards running
+  animation: discard $end-duration ease-out ($open-duration + $open-wait) 1 normal forwards running
 }
 
 .board.state-removing-left .card-container,
 .board.state-removing-center .card-container,
 .board.state-removing-right .card-container {
   animation: remove $end-duration ease-out ($open-duration + $open-wait) 1 normal forwards running
+}
+
+.board.state-shuffling .discard {
+  animation: shuffle $discard-duration ease-out 1 normal forwards running
 }
 
 // Card animations
@@ -253,6 +258,11 @@ body {
 @keyframes remove {
   from { opacity: 1 }
   to { opacity: 0 }
+}
+
+@keyframes shuffle {
+  from { transform: translateX(0px) }
+  to { transform: translateX(-100px) }
 }
 
 // Flips
