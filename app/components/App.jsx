@@ -94,7 +94,6 @@ export default class App extends React.Component {
       sendTo = 'discarding'
     }
 
-    let state
     switch (i) {
     case 0:
       state = `${sendTo}-left`
