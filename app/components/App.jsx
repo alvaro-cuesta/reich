@@ -146,15 +146,15 @@ export default class App extends React.Component {
             : <div className='card-placeholder-hack' />
           }
 
-          {
-            discard.length > 0
-            ? <div className='discard'>
-                <div className='card-lone'>
+          <div className='discard'>
+            {
+              discard.length > 0
+              ? <div className='card-lone'>
                   <BackFace />
                 </div>
-              </div>
-            : null
-          }
+              : null
+            }
+          </div>
         </div>
 
         <div>

@@ -18,7 +18,7 @@ export default {
   start: ((globals, hand, deck, discard, removed) => {
     hand.push('M', 'M', 'S', 'S', 'W', 'W', 'C', 'C')
 
-    deck.push('Ascend in Power', 'ASDF', 'Lorem Ipsum')
+    deck.push('Ascend in Power', 'ASDF', 'Lorem Ipsum', 'ASDF2', 'ASDF3')
   }),
 
   turn: ((globals, hand, deck, discard, removed) => {
@@ -62,6 +62,66 @@ export default {
     },
 
     'ASDF': {
+      text: 'GH IJ KL',
+      actions: [
+        {
+          text: 'Accept',
+          cost: ['S'],
+          actions: {
+            resources: ['B', 'W'],
+            send: 'removed'
+          }
+        },
+
+        {
+          text: 'C',
+          cost: [],
+          actions: {
+            resources: ['I']
+          }
+        },
+
+        {
+          text: 'Deny',
+          cost: [],
+          actions: {
+            resources: ['I']
+          }
+        },
+      ],
+    },
+
+    'ASDF2': {
+      text: 'GH IJ KL',
+      actions: [
+        {
+          text: 'Accept',
+          cost: ['S'],
+          actions: {
+            resources: ['B', 'W'],
+            send: 'removed'
+          }
+        },
+
+        {
+          text: 'C',
+          cost: [],
+          actions: {
+            resources: ['I']
+          }
+        },
+
+        {
+          text: 'Deny',
+          cost: [],
+          actions: {
+            resources: ['I']
+          }
+        },
+      ],
+    },
+
+    'ASDF3': {
       text: 'GH IJ KL',
       actions: [
         {
