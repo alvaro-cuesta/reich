@@ -27,7 +27,7 @@ export default class App extends React.Component {
       discard,
       removed,
       boardCard: null,
-      boardState: 'moving',
+      state: 'moving',
     }
   }
 
@@ -36,7 +36,7 @@ export default class App extends React.Component {
 
     if (animationName === 'move-deck') {
       const boardCard = deck.pop()
-      this.setState({ deck, boardCard, boardState: 'drawing' })
+      this.setState({ deck, boardCard, state: 'drawing' })
     }
   }
 
@@ -45,7 +45,7 @@ export default class App extends React.Component {
 
     switch (animationName) {
     case 'draw':
-      this.setState({ boardState: 'opening' })
+      this.setState({ state: 'opening' })
       return
     case 'remove':
       removed.push(boardCard)
@@ -62,13 +62,13 @@ export default class App extends React.Component {
       discard = []
     }
 
-    this.setState({ deck, discard, removed, boardCard: null, boardState: 'moving' })
+    this.setState({ deck, discard, removed, boardCard: null, state: 'moving' })
   }
 
   handleClickOpen() {
     if (state !== 'drawing') return
 
-    this.setState({ boardState: 'opening' })
+    this.setState({ state: 'opening' })
   }
 
   handleAction(i, action) {
@@ -92,24 +92,24 @@ export default class App extends React.Component {
       sendTo = 'discarding'
     }
 
-    let boardState
+    let state
     switch (i) {
     case 0:
-      boardState = `${sendTo}-left`
+      state = `${sendTo}-left`
       break
     case 1:
-      boardState = `${sendTo}-center`
+      state = `${sendTo}-center`
       break
     case 2:
-      boardState = `${sendTo}-right`
+      state = `${sendTo}-right`
     }
 
-    this.setState({ hand, deck, discard, removed, boardCard, boardState })
+    this.setState({ hand, deck, discard, removed, boardCard, state })
   }
 
   render() {
     const { game } = this.props
-    const { globals, hand, deck, discard, removed, boardCard, boardState } = this.state
+    const { globals, hand, deck, discard, removed, boardCard, state } = this.state
 
     const resourceCount = count(hand)
 
@@ -126,7 +126,7 @@ export default class App extends React.Component {
       </header>
 
       <main>
-        <div className={`board state-${boardState}`}>
+        <div className={`board state-${state}`}>
           <div className='deck' onAnimationEnd={this.handleDeckAnimationEnd}>
             {
               deck.length > 0
@@ -143,7 +143,7 @@ export default class App extends React.Component {
             {
               boardCard !== null
               ? <TripticCard title={boardCard} data={game.cards[boardCard]}
-                  state={boardState}
+                  state={state}
                   onClickOpen={this.handleClickOpen}
                   onAction={this.handleAction}
                 />
