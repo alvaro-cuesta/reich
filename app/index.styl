@@ -1,7 +1,15 @@
 $card-width = 5em
 $card-height = $card-width * 1.61803398875
+$move-deck-duration = 400ms
+$pause-deck-duration = 600ms
+$draw-duration = 1s
 $open-duration = 500ms
 $open-wait = 250ms
+$end-duration = 1s
+$card-draw-height = 60px
+$card-margin = 1em
+$deck-shown = $card-width * 2/5
+$deck-move = $card-width * 1/5
 
 * { box-sizing: border-box }
 
@@ -9,9 +17,22 @@ body {
   text-rendering: optimizeLegibility
 }
 
-.card-container {
+.deck, .discard {
+  width: $card-width
+  height: $card-height
+  z-index: -10
+}
+
+.board {
+  display: flex
+  flex-direction: row
+  transform: translateX($card-width * -1 - $card-margin + $deck-shown)
+}
+
+.card-container, .card-placeholder-hack {
   perspective: 500px
   width: $card-width * 3
+  margin: 0 $card-margin
 }
 
 .card {
@@ -20,6 +41,13 @@ body {
 
   width: 100%
 
+  transform-style: preserve-3d
+}
+
+.card-lone {
+  width: $card-width
+  height: $card-height
+  transform: rotateY(180deg)
   transform-style: preserve-3d
 }
 
@@ -75,8 +103,20 @@ body {
 
 // Draw
 
+.board.board-moving .deck {
+  transform: translateX(0px)
+  animation: move-deck $move-deck-duration ease-out 0s 1 normal forwards running
+}
+
+.board.board-drawing .deck {
+  transform: translateX($deck-move)
+  animation: unmove-deck $move-deck-duration ease-out $pause-deck-duration 1 normal forwards running
+}
+
 .card.card-drawing {
-  animation: draw 1s ease-out 0s 1 normal forwards running
+  animation: draw $draw-duration ease-out 0s 1 normal forwards running
+
+  transform: translate3d(-1000px, 0, 0)
 
   .card-left {
     transform: rotateY(180deg)
@@ -89,7 +129,6 @@ body {
 
   .card-right {
     transform: rotateY(-180deg)
-    z-index: 50
   }
 }
 
@@ -140,24 +179,45 @@ body {
 // End states
 
 .card.card-discarding {
-  animation: discard 1s ease-out ($open-duration + $open-wait) 1 normal forwards running
+  animation: discard $end-duration  ease-out ($open-duration + $open-wait) 1 normal forwards running
 }
 
 .card-container.card-removing {
-  animation: remove 1s ease-out ($open-duration + $open-wait) 1 normal forwards running
+  animation: remove $end-duration ease-out ($open-duration + $open-wait) 1 normal forwards running
 }
 
 // Card animations
 
+@keyframes move-deck {
+  from {
+    transform: translateX(0px)
+  }
+  to {
+    transform: translateX($deck-move)
+  }
+}
+
+@keyframes unmove-deck {
+  from {
+    transform: translateX($deck-move)
+  }
+  to {
+    transform: translateX(0px)
+  }
+}
+
 @keyframes draw {
   0% {
-    transform: translate3d(-100px, 0px, 0px) rotateY(180deg)
+    transform: translate3d($card-width * -2 - $card-margin + $deck-move, 0px, 0px) rotateY(180deg)
   }
-  40% {
-    transform: translate3d(-10px, 0px, 100px) rotateY(180deg)
+  35% {
+    transform: translate3d(-10px, 0px, $card-draw-height) rotateY(180deg)
   }
-  50% {
-    transform: translate3d(-10px, 0px, 100px) rotateY(180deg)
+  45% {
+    transform: translate3d(-10px, 0px, $card-draw-height) rotateY(180deg)
+  }
+  80% {
+    transform: translate3d(0px, 0px, 0px) rotateY(0deg)
   }
   100% {
     transform: translate3d(0px, 0px, 0px) rotateY(0deg)
@@ -168,14 +228,17 @@ body {
   0% {
     transform: translate3d(0px, 0px, 0px) rotateY(0deg)
   }
-  40% {
-    transform: translate3d(10px, 0px, 100px) rotateY(180deg)
+  35% {
+    transform: translate3d(10px, 0px, $card-draw-height) rotateY(180deg)
   }
-  50% {
-    transform: translate3d(10px, 0px, 100px) rotateY(180deg)
+  45% {
+    transform: translate3d(10px, 0px, $card-draw-height) rotateY(180deg)
+  }
+  80% {
+    transform: translate3d($card-margin + $card-width * 2, 0px, 0px) rotateY(180deg)
   }
   100% {
-    transform: translate3d(100px, 0px, 0px) rotateY(180deg)
+    transform: translate3d($card-margin + $card-width * 2, 0px, 0px) rotateY(180deg)
   }
 }
 

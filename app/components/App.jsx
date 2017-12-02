@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import cx from 'classnames'
 
-import TripticCard from 'components/TripticCard'
+import { BackFace, default as TripticCard } from 'components/TripticCard'
 
 import { shuffle, count } from '../util'
 
@@ -9,6 +10,7 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
 
+    this.handleDeckAnimation = this.handleDeckAnimation.bind(this)
     this.handleClickOpen = this.handleClickOpen.bind(this)
     this.handleAction = this.handleAction.bind(this)
     this.handleEnd = this.handleEnd.bind(this)
@@ -18,21 +20,28 @@ export default class App extends React.Component {
 
     game.start(globals, hand, deck, discard, removed)
 
-    const boardCard = deck.pop()
-
     this.state = {
       globals,
       hand,
       deck,
       discard,
       removed,
-      boardCard,
-      boardState: 'drawing',
+      boardCard: null,
+      boardState: 'moving',
     }
   }
 
   handleClickOpen() {
     this.setState({ boardState: 'open' })
+  }
+
+  handleDeckAnimation({ animationName }) {
+    let { deck } = this.state
+
+    if (animationName === 'move-deck') {
+      const boardCard = deck.pop()
+      this.setState({ deck, boardCard, boardState: 'drawing' })
+    }
   }
 
   handleAction(i, action) {
@@ -86,9 +95,7 @@ export default class App extends React.Component {
       discard = []
     }
 
-    boardCard = deck.pop()
-
-    this.setState({ deck, discard, removed, boardCard, boardState: 'drawing' })
+    this.setState({ deck, discard, removed, boardCard: null, boardState: 'moving' })
   }
 
   render() {
@@ -110,12 +117,45 @@ export default class App extends React.Component {
       </header>
 
       <main>
-        <TripticCard title={boardCard} data={game.cards[boardCard]}
-          state={boardState}
-          onClickOpen={this.handleClickOpen}
-          onAction={this.handleAction}
-          onEnd={this.handleEnd}
-        />
+        <div className={cx(
+            'board',
+            {
+              'board-moving': boardState === 'moving',
+              'board-drawing': boardState === 'drawing',
+            }
+          )}
+        >
+          <div className='deck' onAnimationEnd={this.handleDeckAnimation}>
+            {
+              deck.length > 0
+              ? <div className='card-lone'>
+                  <BackFace />
+                </div>
+              : null
+            }
+          </div>
+
+          {
+            boardCard !== null
+            ? <TripticCard title={boardCard} data={game.cards[boardCard]}
+                state={boardState}
+                onClickOpen={this.handleClickOpen}
+                onAction={this.handleAction}
+                onEnd={this.handleEnd}
+              />
+            : <div className='card-placeholder-hack' />
+          }
+
+          {
+            discard.length > 0
+            ? <div className='discard'>
+                <div className='card-lone'>
+                  <BackFace />
+                </div>
+              </div>
+            : null
+          }
+        </div>
 
         <div>
           {handResources}

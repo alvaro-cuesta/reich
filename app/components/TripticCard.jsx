@@ -1,7 +1,8 @@
 import React from 'react'
 import cx from 'classnames'
 
-const Action = ({ action, onClick }) => action !== null
+const Action = ({ action, onClick }) =>
+  action !== null
   ? <div className='card-face card-action card-active-action' onClick={onClick} >
       <div className='card-action-row'>
         {action.text}
@@ -16,6 +17,14 @@ const Action = ({ action, onClick }) => action !== null
       </div>
     </div>
   : <div className='card-face card-action card-null-action' />
+
+export const BackFace = ({ className, ...props }) =>
+  <div
+    className={cx(className, 'card-face', 'card-outside-center')}
+    {...props}
+  >
+    OUTSIDE CENTER
+  </div>
 
 export default class TripticCard extends React.Component {
   constructor(props) {
@@ -50,7 +59,7 @@ export default class TripticCard extends React.Component {
   }
 
   handleCardAnimationEnd(e) {
-    const { state, onEnd } = this.props
+    const { onEnd } = this.props
 
     if (e.animationName === 'discard') {
       onEnd('discard')
@@ -100,9 +109,7 @@ export default class TripticCard extends React.Component {
         </div>
 
         <div className='card-center'>
-          <div className='card-face card-outside-center'>
-            OUTSIDE CENTER
-          </div>
+          <BackFace />
 
           <Action action={actions[1]} onClick={state === 'open' ? () => this.handleAction(1) : null} />
         </div>
