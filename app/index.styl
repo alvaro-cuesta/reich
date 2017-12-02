@@ -103,17 +103,17 @@ body {
 
 // Draw
 
-.board.board-moving .deck {
+.board.state-moving .deck {
   transform: translateX(0px)
   animation: move-deck $move-deck-duration ease-out 0s 1 normal forwards running
 }
 
-.board.board-drawing .deck {
+.board.state-drawing .deck {
   transform: translateX($deck-move)
   animation: unmove-deck $move-deck-duration ease-out $pause-deck-duration 1 normal forwards running
 }
 
-.card.card-drawing {
+.board.state-drawing .card {
   animation: draw $draw-duration ease-out 0s 1 normal forwards running
 
   transform: translate3d(-1000px, 0, 0)
@@ -134,7 +134,7 @@ body {
 
 // Open
 
-.card.card-open {
+.board.state-opening .card {
   .card-left {
     transform: rotateY(180deg)
     animation: unflip-left $open-duration ease-out 0s 1 normal forwards running
@@ -148,7 +148,10 @@ body {
 
  // Closing
 
-.card.card-closing-left {
+.board.state-discarding-left .card,
+.board.state-discarding-center .card,
+.board.state-removing-left .card,
+.board.state-removing-center .card {
   .card-left {
     transform: rotateY(0deg)
     animation: flip-right $open-duration ease-out 0s 1 normal forwards running
@@ -162,7 +165,8 @@ body {
   }
 }
 
-.card.card-closing-right {
+.board.state-discarding-right .card,
+.board.state-removing-right .card {
   .card-left {
     transform: rotateY(0deg)
     animation: flip-right $open-duration ease-out $open-wait 1 normal forwards running
@@ -178,11 +182,15 @@ body {
 
 // End states
 
-.card.card-discarding {
+.board.state-discarding-left .card,
+.board.state-discarding-center .card,
+.board.state-discarding-right .card {
   animation: discard $end-duration  ease-out ($open-duration + $open-wait) 1 normal forwards running
 }
 
-.card-container.card-removing {
+.board.state-removing-left .card-container,
+.board.state-removing-center .card-container,
+.board.state-removing-right .card-container {
   animation: remove $end-duration ease-out ($open-duration + $open-wait) 1 normal forwards running
 }
 

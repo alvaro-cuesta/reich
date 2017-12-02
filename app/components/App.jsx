@@ -10,10 +10,10 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
 
-    this.handleDeckAnimation = this.handleDeckAnimation.bind(this)
+    this.handleDeckAnimationEnd = this.handleDeckAnimationEnd.bind(this)
+    this.handleCardAnimationEnd = this.handleCardAnimationEnd.bind(this)
     this.handleClickOpen = this.handleClickOpen.bind(this)
     this.handleAction = this.handleAction.bind(this)
-    this.handleEnd = this.handleEnd.bind(this)
 
     const { game } = this.props
     const globals = {}, hand = [], deck = [], discard = [], removed = []
@@ -31,11 +31,7 @@ export default class App extends React.Component {
     }
   }
 
-  handleClickOpen() {
-    this.setState({ boardState: 'open' })
-  }
-
-  handleDeckAnimation({ animationName }) {
+  handleDeckAnimationEnd({ animationName }) {
     let { deck } = this.state
 
     if (animationName === 'move-deck') {
@@ -44,7 +40,40 @@ export default class App extends React.Component {
     }
   }
 
+  handleCardAnimationEnd({ animationName }) {
+    let { deck, discard, removed, boardCard } = this.state
+
+    switch (animationName) {
+    case 'draw':
+      this.setState({ boardState: 'opening' })
+      return
+    case 'remove':
+      removed.push(boardCard)
+      break
+    case 'discard':
+      discard.push(boardCard)
+      break
+    default:
+      return
+    }
+
+    if (deck.length === 0) {
+      deck = shuffle(discard)
+      discard = []
+    }
+
+    this.setState({ deck, discard, removed, boardCard: null, boardState: 'moving' })
+  }
+
+  handleClickOpen() {
+    if (state !== 'drawing') return
+
+    this.setState({ boardState: 'opening' })
+  }
+
   handleAction(i, action) {
+    if (state !== 'opening') return
+
     let { hand, deck, discard, removed, boardCard } = this.state
 
     if (typeof action.cost !== 'undefined' && action.cost.length > 0) {
@@ -78,26 +107,6 @@ export default class App extends React.Component {
     this.setState({ hand, deck, discard, removed, boardCard, boardState })
   }
 
-  handleEnd(sendTo) {
-    let { deck, discard, removed, boardCard } = this.state
-
-    switch (sendTo) {
-    case 'removed':
-      removed.push(boardCard)
-      break
-    default:
-    case 'discard':
-      discard.push(boardCard)
-    }
-
-    if (deck.length === 0) {
-      deck = shuffle(discard)
-      discard = []
-    }
-
-    this.setState({ deck, discard, removed, boardCard: null, boardState: 'moving' })
-  }
-
   render() {
     const { game } = this.props
     const { globals, hand, deck, discard, removed, boardCard, boardState } = this.state
@@ -117,15 +126,8 @@ export default class App extends React.Component {
       </header>
 
       <main>
-        <div className={cx(
-            'board',
-            {
-              'board-moving': boardState === 'moving',
-              'board-drawing': boardState === 'drawing',
-            }
-          )}
-        >
-          <div className='deck' onAnimationEnd={this.handleDeckAnimation}>
+        <div className={`board state-${boardState}`}>
+          <div className='deck' onAnimationEnd={this.handleDeckAnimationEnd}>
             {
               deck.length > 0
               ? <div className='card-lone'>
@@ -135,16 +137,19 @@ export default class App extends React.Component {
             }
           </div>
 
-          {
-            boardCard !== null
-            ? <TripticCard title={boardCard} data={game.cards[boardCard]}
-                state={boardState}
-                onClickOpen={this.handleClickOpen}
-                onAction={this.handleAction}
-                onEnd={this.handleEnd}
-              />
-            : <div className='card-placeholder-hack' />
-          }
+          <div className='card-container'
+            onAnimationEnd={this.handleCardAnimationEnd}
+          >
+            {
+              boardCard !== null
+              ? <TripticCard title={boardCard} data={game.cards[boardCard]}
+                  state={boardState}
+                  onClickOpen={this.handleClickOpen}
+                  onAction={this.handleAction}
+                />
+              : <div className='card-placeholder-hack' />
+            }
+          </div>
 
           <div className='discard'>
             {
