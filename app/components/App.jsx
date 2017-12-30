@@ -120,7 +120,7 @@ export default class App extends React.PureComponent {
     this.clap2.disconnect();
     this.metronome.disconnect();
 
-    window.removeEventListener('keydown', this.keyDownListener, false);
+    window.removeEventListener('keydown', this.handleKeyDown, false);
   }
 
   //
