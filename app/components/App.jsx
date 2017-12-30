@@ -34,43 +34,58 @@ const Input = ({label, ...props}) => <label>
     : null}
 </label>;
 
+class Oscillator {
+  constructor(context, f) {
+    this.f = f;
+    this.context = context;
+
+    this.oscillator = context.createOscillator();
+    this.oscillator.type = 'square';
+    this.oscillator.frequency.value = f;
+
+    this.gain = context.createGain();
+    this.gain.gain.value = 0;
+
+    this.oscillator.start();
+    this.oscillator.connect(this.gain);
+
+    this.gain.connect(context.destination);
+  }
+
+  schedule(gain, start, end) {
+    this.gain.gain.setValueAtTime(gain, start);
+    this.gain.gain.setValueAtTime(0, end);
+  }
+
+  scheduleFrequency(frequency, start) {
+    this.oscillator.frequency.setValueAtTime(frequency, start);
+  }
+
+  cancelScheduledValues() {
+    let now = this.context.currentTime;
+
+    this.oscillator.frequency.cancelScheduledValues(now);
+    this.gain.gain.cancelScheduledValues(now);
+
+    this.gain.gain.value = 0;
+    this.oscillator.frequency.value = this.f;
+  }
+
+  disconnect() {
+    this.gain.disconnect();
+    this.oscillator.disconnect();
+  }
+}
+
 export default class App extends React.PureComponent {
   constructor(props) {
     super(props);
 
     let {context} = props;
 
-    this.clap1 = context.createOscillator();
-    this.clap2 = context.createOscillator();
-    this.metronome = context.createOscillator();
-
-    this.clap1Gain = context.createGain();
-    this.clap2Gain = context.createGain();
-    this.metronomeGain = context.createGain();
-
-    this.clap1.type = 'square';
-    this.clap2.type = 'square';
-    this.metronome.type = 'square';
-
-    this.clap1.frequency.value = CLAP1_F;
-    this.clap2.frequency.value = CLAP2_F;
-    this.metronome.frequency.value = METRONOME_ACCENT_F;
-
-    this.clap1Gain.gain.value = 0;
-    this.clap2Gain.gain.value = 0;
-    this.metronomeGain.gain.value = 0;
-
-    this.clap1.start();
-    this.clap2.start();
-    this.metronome.start();
-
-    this.clap1.connect(this.clap1Gain);
-    this.clap2.connect(this.clap2Gain);
-    this.metronome.connect(this.metronomeGain);
-
-    this.clap1Gain.connect(context.destination);
-    this.clap2Gain.connect(context.destination);
-    this.metronomeGain.connect(context.destination);
+    this.clap1 = new Oscillator(context, CLAP1_F);
+    this.clap2 = new Oscillator(context, CLAP2_F);
+    this.metronome = new Oscillator(context, METRONOME_ACCENT_F);
 
     const parseBool = (b) => b === 'true';
 
@@ -95,10 +110,6 @@ export default class App extends React.PureComponent {
 
   componentWillUnmount() {
     this.handleStop();
-
-    this.clap1Gain.disconnect();
-    this.clap2Gain.disconnect();
-    this.metronomeGain.disconnect();
 
     this.clap1.disconnect();
     this.clap2.disconnect();
@@ -188,10 +199,9 @@ export default class App extends React.PureComponent {
 
     let now = context.currentTime;
 
-    this.clap1Gain.gain.cancelScheduledValues(now);
-    this.clap2Gain.gain.cancelScheduledValues(now);
-    this.metronomeGain.gain.cancelScheduledValues(now);
-    this.metronome.frequency.cancelScheduledValues(context.currentTime);
+    this.clap1.cancelScheduledValues();
+    this.clap2.cancelScheduledValues();
+    this.metronome.cancelScheduledValues();
 
     this.performanceNow = performance.now();
     this.timeStamp = timeStamp;
@@ -205,8 +215,7 @@ export default class App extends React.PureComponent {
     });
 
     if (countMetronome) {
-      this.metronomeGain.gain.value = ACCENT_GAIN;
-      this.metronomeGain.gain.setValueAtTime(0, now + CLAP_LENGTH);
+      this.metronome.schedule(ACCENT_GAIN, now, now + CLAP_LENGTH);
     }
 
     this.timeInterval = setInterval(() => {
@@ -222,15 +231,9 @@ export default class App extends React.PureComponent {
 
     clearInterval(this.timeInterval);
 
-    this.clap1Gain.gain.cancelScheduledValues(context.currentTime);
-    this.clap2Gain.gain.cancelScheduledValues(context.currentTime);
-    this.metronomeGain.gain.cancelScheduledValues(context.currentTime);
-    this.metronome.frequency.cancelScheduledValues(context.currentTime);
-
-    this.clap1Gain.gain.value = 0;
-    this.clap2Gain.gain.value = 0;
-    this.metronomeGain.gain.value = 0;
-    this.metronome.frequency.value = METRONOME_ACCENT_F;
+    this.clap1.cancelScheduledValues();
+    this.clap2.cancelScheduledValues();
+    this.metronome.cancelScheduledValues();
 
     this.setState({
       startTime: false,
@@ -280,27 +283,23 @@ export default class App extends React.PureComponent {
 
     if (pattern >= 0) {
       if (clap1 && CLAP_PATTERN[(pulse) % CLAP_PATTERN.length]) {
-        this.clap1Gain.gain.setValueAtTime(gain, pulseStart);
-        this.clap1Gain.gain.setValueAtTime(0, pulseEnd);
+        this.clap1.schedule(gain, pulseStart, pulseEnd);
       }
 
       let shift = Math.floor(pattern / repeats);
       if (clap2 && CLAP_PATTERN[(shift + pulse) % CLAP_PATTERN.length]) {
-        this.clap2Gain.gain.setValueAtTime(gain, pulseStart);
-        this.clap2Gain.gain.setValueAtTime(0, pulseEnd);
+        this.clap2.schedule(gain, pulseStart, pulseEnd);
       }
     }
 
     let isMetronome = metronome && pattern >= 0 && (pulse % 2) === 0;
     let isCountMetronome = countMetronome && pattern === -1 && (pulse % 2) === 0;
     if (isMetronome || isCountMetronome) {
-      this.metronome.frequency.setValueAtTime(
+      this.metronome.scheduleFrequency(
         pulse === 0 ? METRONOME_ACCENT_F : METRONOME_F,
         pulseStart
       );
-
-      this.metronomeGain.gain.setValueAtTime(gain, pulseStart);
-      this.metronomeGain.gain.setValueAtTime(0, pulseEnd);
+      this.metronome.schedule(gain, pulseStart, pulseEnd);
     }
   }
 
