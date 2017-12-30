@@ -2,200 +2,436 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
-import { BackFace, default as TripticCard } from 'components/TripticCard'
+import PatternTable from 'components/PatternTable'
 
-import { shuffle, count } from '../util'
+const CLAP_PATTERN = [
+  true, true, true, false,
+  true, true, false, true,
+  false, true, true, false,
+];
+const CLAP_LENGTH = 0.0125;
+const CLAP1_F = 440;
+const CLAP2_F = 230;
+const METRONOME_F = 890;
+const METRONOME_ACCENT_F = 1780;
+const ACCENT_GAIN = 1;
+const GAIN = 0.25;
+const CLAP1_KEYS = [90];
+const CLAP2_KEYS = [77];
 
-export default class App extends React.Component {
+const localStorageGet = (key, parser, defaultVal) => {
+  let result = localStorage.getItem(key);
+  return (result !== null) ? parser(result) : defaultVal;
+};
+
+const Input = ({label, ...props}) => <label>
+  {props.type !== 'checkbox'
+    ? <span className='label noselect'>{label}</span>
+    : null}
+  <input {...props} />
+  {props.type === 'checkbox'
+    ? <span className='label noselect'>{label}</span>
+    : null}
+</label>;
+
+export default class App extends React.PureComponent {
   constructor(props) {
-    super(props)
+    super(props);
 
-    this.handleDeckAnimationEnd = this.handleDeckAnimationEnd.bind(this)
-    this.handleDiscardAnimationEnd = this.handleDiscardAnimationEnd.bind(this)
-    this.handleCardAnimationEnd = this.handleCardAnimationEnd.bind(this)
-    this.handleClickOpen = this.handleClickOpen.bind(this)
-    this.handleAction = this.handleAction.bind(this)
+    let {context} = props;
 
-    const { game } = this.props
-    const globals = {}, hand = [], deck = [], discard = [], removed = []
+    this.clap1 = context.createOscillator();
+    this.clap2 = context.createOscillator();
+    this.metronome = context.createOscillator();
 
-    game.start(globals, hand, deck, discard, removed)
+    this.clap1Gain = context.createGain();
+    this.clap2Gain = context.createGain();
+    this.metronomeGain = context.createGain();
+
+    this.clap1.type = 'square';
+    this.clap2.type = 'square';
+    this.metronome.type = 'square';
+
+    this.clap1.frequency.value = CLAP1_F;
+    this.clap2.frequency.value = CLAP2_F;
+    this.metronome.frequency.value = METRONOME_ACCENT_F;
+
+    this.clap1Gain.gain.value = 0;
+    this.clap2Gain.gain.value = 0;
+    this.metronomeGain.gain.value = 0;
+
+    this.clap1.start();
+    this.clap2.start();
+    this.metronome.start();
+
+    this.clap1.connect(this.clap1Gain);
+    this.clap2.connect(this.clap2Gain);
+    this.metronome.connect(this.metronomeGain);
+
+    this.clap1Gain.connect(context.destination);
+    this.clap2Gain.connect(context.destination);
+    this.metronomeGain.connect(context.destination);
+
+    const parseBool = (b) => b === 'true';
 
     this.state = {
-      globals,
-      hand,
-      deck,
-      discard,
-      removed,
-      boardCard: null,
-      state: 'moving',
-    }
+      tempo: localStorageGet('tempo', parseInt, 120),
+      repeats: localStorageGet('repeats', parseInt, 4),
+      swing: localStorageGet('swing', parseFloat, 0.5),
+      clap1: localStorageGet('clap1', parseBool, true),
+      clap2: localStorageGet('clap2', parseBool, true),
+      metronome: localStorageGet('metronome', parseBool, false),
+      countMetronome: localStorageGet('countMetronome', parseBool, true),
+      startTime: false,
+      now: false,
+      userInput: false,
+    };
   }
 
-  handleDeckAnimationEnd({ animationName }) {
-    let { deck } = this.state
-
-    if (animationName === 'move-deck') {
-      const boardCard = deck.pop()
-      this.setState({ deck, boardCard, state: 'drawing' })
-    }
+  componentWillMount() {
+    this.keyDownListener = this.handleKeyDown.bind(this);
+    window.addEventListener('keydown', this.keyDownListener, false);
   }
 
-  handleDiscardAnimationEnd({ animationName }) {
-    let { deck, discard } = this.state
+  componentWillUnmount() {
+    this.handleStop();
 
-    if (animationName === 'shuffle') {
-      deck = shuffle(discard)
-      discard = []
+    this.clap1Gain.disconnect();
+    this.clap2Gain.disconnect();
+    this.metronomeGain.disconnect();
 
-      this.setState({ deck, discard, state: 'moving' })
-    }
+    this.clap1.disconnect();
+    this.clap2.disconnect();
+    this.metronome.disconnect();
+
+    window.removeEventListener('keydown', this.keyDownListener, false);
   }
 
-  handleCardAnimationEnd({ animationName }) {
-    let { deck, discard, removed, boardCard } = this.state
+  //
 
-    switch (animationName) {
-    case 'draw':
-      this.setState({ state: 'opening' })
-      return
-    case 'remove':
-      removed.push(boardCard)
-      break
-    case 'discard':
-      discard.push(boardCard)
-      break
-    default:
-      return
-    }
+  handleKeyDown({repeat, key, keyCode, timeStamp}) {
+    if (repeat) return;
 
-    if (deck.length === 0) {
-      this.setState({ discard, removed, boardCard: null, state: 'shuffling' })
+    let {userInput} = this.state;
+    let {pattern, pulse} = this.getPosition();
+    let {currPulseDiff, nextPulseDiff} = this.getPulseDiff(performance.now() - timeStamp);
+
+    if (CLAP1_KEYS.includes(keyCode)) {
+      console.log('clap1', currPulseDiff, nextPulseDiff);
+
+      if (userInput[pattern] === undefined) {
+        userInput[pattern] = [];
+      }
+
+      if (currPulseDiff < nextPulseDiff) {
+        userInput[pattern][pulse] = currPulseDiff;
+      } else {
+        pulse += 1;
+        if (pulse === CLAP_PATTERN.length) {
+          pulse = 0;
+          pattern += 1;
+
+          if (userInput[pattern] === undefined) {
+            userInput[pattern] = [];
+          }
+        }
+
+        userInput[pattern][pulse] = nextPulseDiff;
+      }
+
+      this.setState({userInput});
+    } else if (CLAP2_KEYS.includes(keyCode)) {
+      console.log('clap2', currPulseDiff, nextPulseDiff);
     } else {
-      this.setState({ discard, removed, boardCard: null, state: 'moving' })
+      console.log(key, keyCode);
     }
   }
 
-  handleClickOpen() {
-    let { state } = this.state
-
-    if (state !== 'drawing') return
-
-    this.setState({ state: 'opening' })
+  handleTempo({target: {value}}) {
+    localStorage.setItem('tempo', value);
+    this.setState({tempo: parseInt(value)});
   }
 
-  handleAction(i, action) {
-    let { hand, deck, discard, removed, boardCard, state } = this.state
+  handleRepeats({target: {value}}) {
+    localStorage.setItem('repeats', value);
+    this.setState({repeats: parseInt(value)});
+  }
 
-    if (state !== 'opening') return
+  handleSwing({target: {value}}) {
+    localStorage.setItem('swing', value);
+    this.setState({swing: parseFloat(value)});
+  }
 
-    if (typeof action.cost !== 'undefined' && action.cost.length > 0) {
-      for (let resource of action.cost) {
-        hand[resource]--
+  handleClap1({target: {checked}}) {
+    localStorage.setItem('clap1', checked);
+    this.setState({clap1: checked});
+  }
+
+  handleClap2({target: {checked}}) {
+    localStorage.setItem('clap2', checked);
+    this.setState({clap2: checked});
+  }
+
+  handleMetronome({target: {checked}}) {
+    localStorage.setItem('metronome', checked);
+    this.setState({metronome: checked});
+  }
+
+  handleCountMetronome({target: {checked}}) {
+    localStorage.setItem('countMetronome', checked);
+    this.setState({countMetronome: checked});
+  }
+
+  handleStart({timeStamp}) {
+    let {context} = this.props;
+    let {countMetronome} = this.state;
+
+    let now = context.currentTime;
+
+    this.clap1Gain.gain.cancelScheduledValues(now);
+    this.clap2Gain.gain.cancelScheduledValues(now);
+    this.metronomeGain.gain.cancelScheduledValues(now);
+    this.metronome.frequency.cancelScheduledValues(context.currentTime);
+
+    this.performanceNow = performance.now();
+    this.timeStamp = timeStamp;
+
+    this.lastPulse = false;
+
+    this.setState({
+      startTime: now + this.getSecsPerBeat()/2 * CLAP_PATTERN.length,
+      now: now,
+      userInput: [],
+    });
+
+    if (countMetronome) {
+      this.metronomeGain.gain.value = ACCENT_GAIN;
+      this.metronomeGain.gain.setValueAtTime(0, now + CLAP_LENGTH);
+    }
+
+    this.timeInterval = setInterval(() => {
+      this.setState(
+        {now: context.currentTime},
+        this.handleSound.bind(this)
+      );
+    }, 1);
+  }
+
+  handleStop() {
+    let {context} = this.props;
+
+    clearInterval(this.timeInterval);
+
+    this.clap1Gain.gain.cancelScheduledValues(context.currentTime);
+    this.clap2Gain.gain.cancelScheduledValues(context.currentTime);
+    this.metronomeGain.gain.cancelScheduledValues(context.currentTime);
+    this.metronome.frequency.cancelScheduledValues(context.currentTime);
+
+    this.clap1Gain.gain.value = 0;
+    this.clap2Gain.gain.value = 0;
+    this.metronomeGain.gain.value = 0;
+    this.metronome.frequency.value = METRONOME_ACCENT_F;
+
+    this.setState({
+      startTime: false,
+      now: false,
+    });
+  }
+
+  //
+
+  handleSound() {
+    let {repeats} = this.state;
+    let {pattern, pulse, totalPulses} = this.getPosition();
+
+    if (pattern >= (CLAP_PATTERN.length + 1) * repeats) {
+      this.handleStop();
+      return;
+    }
+
+    if (this.lastPulse === false) { // Just started: schedfule first pulse
+      this.lastPulse = 0;
+    } else {
+      if (pulse === this.lastPulse) return;
+      this.lastPulse = pulse;
+    }
+
+    // Schedule _next_ pulse
+
+    pulse += 1;
+    totalPulses += 1;
+
+    if (pulse === CLAP_PATTERN.length) {
+      pulse = 0;
+      pattern += 1;
+    }
+
+    if (pattern >= (CLAP_PATTERN.length + 1) * repeats) return;
+
+    this.schedulePulseSound(pulse, pattern, totalPulses);
+  }
+
+  schedulePulseSound(pulse, pattern, totalPulses, instant) {
+    let {clap1, clap2, metronome, countMetronome, repeats} = this.state;
+
+    let pulseStart = this.getPulseStart(totalPulses);
+    let pulseEnd = pulseStart + CLAP_LENGTH;
+    let gain = pulse === 0 ? ACCENT_GAIN : GAIN;
+
+    if (pattern >= 0) {
+      if (clap1 && CLAP_PATTERN[(pulse) % CLAP_PATTERN.length]) {
+        this.clap1Gain.gain.setValueAtTime(gain, pulseStart);
+        this.clap1Gain.gain.setValueAtTime(0, pulseEnd);
+      }
+
+      let shift = Math.floor(pattern / repeats);
+      if (clap2 && CLAP_PATTERN[(shift + pulse) % CLAP_PATTERN.length]) {
+        this.clap2Gain.gain.setValueAtTime(gain, pulseStart);
+        this.clap2Gain.gain.setValueAtTime(0, pulseEnd);
       }
     }
 
-    let sendTo
-    switch (action.actions.send) {
-    case 'removed':
-      sendTo = 'removing'
-      break
-    case 'discard':
-    default:
-      sendTo = 'discarding'
-    }
+    let isMetronome = metronome && pattern >= 0 && (pulse % 2) === 0;
+    let isCountMetronome = countMetronome && pattern === -1 && (pulse % 2) === 0;
+    if (isMetronome || isCountMetronome) {
+      this.metronome.frequency.setValueAtTime(
+        pulse === 0 ? METRONOME_ACCENT_F : METRONOME_F,
+        pulseStart
+      );
 
-    switch (i) {
-    case 0:
-      state = `${sendTo}-left`
-      break
-    case 1:
-      state = `${sendTo}-center`
-      break
-    case 2:
-      state = `${sendTo}-right`
+      this.metronomeGain.gain.setValueAtTime(gain, pulseStart);
+      this.metronomeGain.gain.setValueAtTime(0, pulseEnd);
     }
-
-    this.setState({ hand, deck, discard, removed, boardCard, state })
   }
 
+  getSecsPerBeat() {
+    return 60/this.state.tempo;
+  }
+
+  getPosition() {
+    let {swing, startTime, now} = this.state;
+
+    if (startTime === false) return {};
+
+    let totalBeats = (now - startTime) / this.getSecsPerBeat();
+
+    let totalPulses = Math.floor(totalBeats) * 2 +
+      ((1 + (totalBeats % 1)) % 1 < swing ? 0 : 1);
+
+    // console.log(totalPulses);
+
+    if (startTime >= now) {
+      let pulse = totalPulses;
+      while (pulse < 0) pulse += CLAP_PATTERN.length;
+
+      return {
+        pattern: Math.floor(totalPulses / CLAP_PATTERN.length),
+        pulse,
+        totalPulses,
+      };
+    }
+
+    return {
+      pattern: Math.floor(totalPulses / CLAP_PATTERN.length),
+      pulse: totalPulses % CLAP_PATTERN.length,
+      totalPulses,
+    };
+  }
+
+  getPulseDiff(delta) {
+    let {context} = this.props;
+    let {swing} = this.state;
+    let {totalPulses} = this.getPosition();
+
+    let now = context.currentTime - delta/1000;
+    let secsPerBeat = this.getSecsPerBeat();
+
+    let currPulseDiff = (now - this.getPulseStart(totalPulses)) / (secsPerBeat * swing);
+    let nextPulseDiff = (this.getPulseStart(totalPulses + 1) - now) / (secsPerBeat * (1 - swing));
+
+    return {
+      currPulseDiff,
+      nextPulseDiff,
+    };
+  }
+
+  getPulseStart(totalPulses) {
+    let {startTime, swing} = this.state;
+
+    let totalBeats = Math.floor(totalPulses/2) +
+      (totalPulses % 2 === 0 ? 0 : swing);
+
+    return startTime + totalBeats * this.getSecsPerBeat();
+  }
+
+  //
+
   render() {
-    const { game } = this.props
-    const { globals, hand, deck, discard, removed, boardCard, state } = this.state
+    let {tempo, repeats, swing, clap1, clap2, metronome, countMetronome, startTime, now, userInput} = this.state;
+    let {pattern, pulse} = this.getPosition();
 
-    const resourceCount = count(hand)
+    let buttonHandler, buttonLabel;
+    if (pattern === undefined) {
+      buttonHandler = this.handleStart.bind(this);
+      buttonLabel = 'Start';
+    } else if (pattern < 0) {
+      buttonHandler = this.handleStop.bind(this);
+      buttonLabel = Math.floor(pulse / 2) + 1;
+    } else {
+      buttonHandler = this.handleStop.bind(this);
+      buttonLabel = 'Stop';
+    }
 
-    const handResources = Object.keys(game.resources).map(k =>
-      <span key={k} title={game.resources[k]}>
-        {k}: {resourceCount[k] || 0}
-      </span>
-    )
+    return <div className='reich-app'>
+      <div className='controls'>
+        <fieldset className='tempo'>
+          <Input label='Tempo:' type='number'
+            min={1} max={999} step={1} value={tempo}
+            onChange={this.handleTempo.bind(this)}
+          />
+          <Input label='Repeats:' type='number'
+            min={1} max={999} step={1} value={repeats}
+            onChange={this.handleRepeats.bind(this)}
+          />
+          <Input label='Swing:' type='number'
+            min={0.1} max={0.9} step={0.01} value={swing}
+            onChange={this.handleSwing.bind(this)}
+          />
+        </fieldset>
 
-    return <div>
-      <header>
-        <h1>{game.title}</h1>
-        <h2>{game.subtitle}</h2>
-      </header>
+        <fieldset>
+          <div className='noselect'>Sounds:</div>
+          <Input label='Clap 1' type='checkbox'
+            checked={clap1}
+            onChange={this.handleClap1.bind(this)}
+          />
+          <Input label='Clap 2' type='checkbox'
+            checked={clap2}
+            onChange={this.handleClap2.bind(this)}
+          />
+          <Input label='Metronome' type='checkbox'
+            checked={metronome}
+            onChange={this.handleMetronome.bind(this)}
+          />
+          <Input label='Count' type='checkbox'
+            checked={countMetronome}
+            onChange={this.handleCountMetronome.bind(this)}
+          />
+        </fieldset>
+      </div>
 
-      <main>
-        <div className={`board state-${state}`}>
-          <div className='deck' onAnimationEnd={this.handleDeckAnimationEnd}>
-            {
-              deck.length > 0
-              ? <div className='card-lone'>
-                  <BackFace />
-                </div>
-              : null
-            }
-          </div>
-
-          <div className='card-container' onAnimationEnd={this.handleCardAnimationEnd}>
-            {
-              boardCard !== null
-              ? <TripticCard title={boardCard} data={game.cards[boardCard]}
-                  state={state}
-                  onClickOpen={this.handleClickOpen}
-                  onAction={this.handleAction}
-                />
-              : null
-            }
-          </div>
-
-          <div className='discard' onAnimationEnd={this.handleDiscardAnimationEnd}>
-            {
-              discard.length > 2
-              ? <div className='card-lone'>
-                  <BackFace />
-                </div>
-              : null
-            }
-            {
-              discard.length > 1
-              ? <div className='card-lone'>
-                  <BackFace />
-                </div>
-              : null
-            }
-            {
-              discard.length > 0
-              ? <div className='card-lone'>
-                  <BackFace />
-                </div>
-              : null
-            }
-          </div>
-        </div>
-
-        <div>
-          {handResources}
-        </div>
-      </main>
-    </div>
+      <PatternTable
+        buttonHandler={buttonHandler}
+        buttonLabel={buttonLabel}
+        clapPattern={CLAP_PATTERN}
+        pattern={pattern}
+        pulse={pulse}
+        repeats={repeats}
+        userInput={userInput}
+    />
+    </div>;
   }
 }
 
 App.propTypes = {
-}
-
-App.childContextTypes = {
 }

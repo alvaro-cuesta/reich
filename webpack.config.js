@@ -20,10 +20,10 @@ const COMMON = merge(
   parts.dontEmitIfErrors(),
   parts.basic(PATHS),
   {
-    entry: { 'card-game': [ './index.jsx' ] },
+    entry: { 'reich': [ './index.jsx' ] },
     plugins: [
       new HtmlWebpackPlugin({
-        title: 'Card Game',
+        title: 'Reich Clapping Trainer',
         metadata: metadata,
         template: 'index.ejs',
         chunksSortMode: 'dependency',

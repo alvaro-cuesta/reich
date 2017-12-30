@@ -1,290 +1,213 @@
-$card-width = 5em
-$card-height = $card-width * 1.61803398875
-$move-deck-duration = 400ms
-$pause-deck-duration = 600ms
-$draw-duration = 1s
-$open-duration = 500ms
-$open-wait = 250ms
-$end-duration = 1s
-$discard-duration = 3s
-$card-draw-height = 60px
-$card-margin = 1em
-$deck-shown = $card-width * 2/5
-$deck-move = $card-width * 1/5
+$palette = #222 #282828 #333 #383838 #aaa #d0d0d0 #e0e0e0 #fff;
+$border-width = 2px;
+$table-border = $border-width solid $palette[5];
+$cell-size = 1.3em;
+$head-size = 4.5em;
 
-* { box-sizing: border-box }
+* { box-sizing: border-box; }
 
-body {
-  text-rendering: optimizeLegibility
+html, body {
+  margin: 0;
+  padding: 0;
 }
 
-.deck, .discard {
-  width: $card-width
-  height: $card-height
-  z-index: -10
+body, input, button {
+  color: $palette[6];
+  background-color: $palette[1];
 }
 
-.board {
-  display: flex
-  flex-direction: row
-  transform: translateX($card-width * -1 - $card-margin + $deck-shown)
-}
+label {
+  display: flex;
+  align-items: baseline;
 
-.card-container {
-  perspective: 500px
-  width: $card-width * 3
-  margin: 0 $card-margin
-}
-
-.card {
-  display: flex
-  flex-direction: row
-
-  width: 100%
-
-  transform-style: preserve-3d
-}
-
-.card-lone {
-  width: $card-width
-  height: $card-height
-  transform: rotateY(180deg)
-  transform-style: preserve-3d
-}
-
-.card-left, .card-center, .card-right {
-  width: $card-width
-  height: $card-height
-
-  position: relative
-  top: 0
-}
-
-.card-face {
-  width: 100%
-  height: 100%
-
-  backface-visibility: hidden
-
-  position: absolute
-  top: 0
-  left: 0
-}
-
-.card-left, .card-center, .card-right, .card-face {
-  transform-style: preserve-3d
-}
-
-.card-left {
-  transform-origin: 100% 50% 0
-}
-
-.card-right {
-  transform-origin: 0% 50% 0
-}
-
-.card-action {
-  display: flex
-  flex-direction: column
-}
-
-.card-action-row {
-  height: 33%
-}
-
-.card-active-action {
-  cursor: pointer
-}
-
-.card-outside-left, .card-outside-center, .card-outside-right {
-  transform: rotateY(180deg) translateZ(1px)
-}
-
-// Card states
-
-// Draw
-
-.board.state-moving .deck {
-  transform: translateX(0px)
-  animation: move-deck $move-deck-duration ease-out 0s 1 normal forwards running
-}
-
-.board.state-drawing .deck {
-  transform: translateX($deck-move)
-  animation: unmove-deck $move-deck-duration ease-out $pause-deck-duration 1 normal forwards running
-}
-
-.board.state-drawing .card {
-  animation: draw $draw-duration ease-out 0s 1 normal forwards running
-
-  transform: translate3d(-1000px, 0, 0)
-
-  .card-left {
-    transform: rotateY(180deg)
-    z-index: 100
-  }
-
-  .card-outside-left {
-    cursor: pointer
-  }
-
-  .card-right {
-    transform: rotateY(-180deg)
+  .label {
+    flex-grow: 1;
+    margin-right: 0.5em;
   }
 }
 
-// Open
+input[type='checkbox'] { margin-right: 0.25em; }
 
-.board.state-opening .card {
-  .card-left {
-    transform: rotateY(180deg)
-    animation: unflip-left $open-duration ease-out 0s 1 normal forwards running
-  }
+.tempo input {
+  width: 4em;
+  padding: 0 0 0 0.1em;
+}
 
-  .card-right {
-    transform: rotateY(-180deg)
-    animation: unflip-right $open-duration ease-out $open-wait 1 normal forwards running
+button {
+  height: 100%;
+  width: 100%;
+}
+
+.controls {
+  display: flex;
+  align-items: flex-end;
+}
+
+fieldset {
+  //display: flex;
+  padding: 0.5em;
+  border: none;
+}
+
+.noselect {
+  cursor: default;
+
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}
+
+// Layout
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+.reich-app {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pattern-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 2vw;
+}
+
+.pattern-clap2 {
+  overflow: auto;
+}
+
+// Pattern view
+
+.pattern {
+  border-left: $table-border;
+  border-right: $table-border;
+}
+
+.arrow-row .pattern {
+  border-top: $table-border;
+}
+
+.arrow-row {
+  background-color: black;
+  top: 0;
+}
+
+.arrow-row, .pattern-clap1 {
+  position: sticky;
+  left: 0;
+  z-index: 1000;
+  background-color: $palette[1];
+}
+
+.pattern-clap1 {
+  top: $cell-size;
+  border-top: $table-border;
+  border-bottom: $table-border;
+
+  &::after {
+    position: absolute;
+    content: '';
+    bottom: "calc(-%s - %s)" % ($cell-size $border-width);
+    left: "calc(%s + %s)" % ($head-size $border-width);
+    width: $cell-size * 12;
+    height: $cell-size;
+    background: linear-gradient(
+      180deg,
+      $palette[1] 0%,
+      rgba($palette[1], .95) 25%,
+      rgba($palette[1], .8) 50%,
+      rgba($palette[1], .6) 75%,
+      rgba($palette[1], .1) 95%,
+      transparent
+    );
   }
 }
 
- // Closing
+//
 
-.board.state-discarding-left .card,
-.board.state-discarding-center .card,
-.board.state-removing-left .card,
-.board.state-removing-center .card {
-  .card-left {
-    transform: rotateY(0deg)
-    animation: flip-right $open-duration ease-out 0s 1 normal forwards running
-    z-index: 50
+.head, .cell, .pattern { display: inline-block; }
+
+.head, .cell {
+  text-align: center;
+  height: $cell-size;
+}
+
+.head {
+  width: $head-size;
+  vertical-align: top;
+
+  // Hack!
+  position: relative;
+  top: -2px;
+}
+
+.cell {
+  width: $cell-size;
+  vertical-align: middle;
+}
+
+.clap-row {
+  &:not(.empty) .pulse {
+    position: relative;
+
+    &::before { content: '●'; }
+
+    &.clap {
+      color: $palette[7];
+      &.highlight { color: $palette[8]; }
+      &.hit-good, &.hit-ok, &.hit-bad, &.no-hit {
+        &::after {
+          position: absolute;
+          top: 0;
+          left: 0;
+          content: '○';
+          width: 100%;
+        }
+      }
+      &.hit-good { color: #BAFFC9; }
+      &.hit-ok { color: #FFFFBA; }
+      &.hit-bad { color: #FFCE96; }
+      &.no-hit { color: #FFB3BA; }
+    }
+
+    &.silence {
+      color: $palette[3];
+
+      &.hit-good, &.hit-ok, &.hit-bad, &.no-hit {
+        &::after {
+          position: absolute;
+          top: 0;
+          left: 0;
+          content: '○';
+          width: 100%;
+        }
+      }
+
+      &.hit-good, &.hit-ok, &.hit-bad {
+        color: #443133;
+        &::after { color: rgba(#FFB3BA, 0.2); }
+      }
+      &.no-hit::after { color: rgba(#BAFFC9, 0.2); }
+    }
   }
 
-  .card-right {
-    transform: rotateY(0deg)
-    animation: flip-left $open-duration ease-out $open-wait 1 normal forwards running
-    z-index: 100
+  &.highlight .pattern {
+    background-color: $palette[2];
+    .silence { color: $palette[4]; }
   }
 }
 
-.board.state-discarding-right .card,
-.board.state-removing-right .card {
-  .card-left {
-    transform: rotateY(0deg)
-    animation: flip-right $open-duration ease-out $open-wait 1 normal forwards running
-    z-index: 100
-  }
-
-  .card-right {
-    transform: rotateY(0deg)
-    animation: flip-left $open-duration ease-out 0ms 1 normal forwards running
-    z-index: 50
-  }
-}
-
-// End states
-
-.board.state-discarding-left .card,
-.board.state-discarding-center .card,
-.board.state-discarding-right .card {
-  animation: discard $end-duration ease-out ($open-duration + $open-wait) 1 normal forwards running
-}
-
-.board.state-removing-left .card-container,
-.board.state-removing-center .card-container,
-.board.state-removing-right .card-container {
-  animation: remove $end-duration ease-out ($open-duration + $open-wait) 1 normal forwards running
-}
-
-.board.state-shuffling .discard {
-  animation: shuffle $discard-duration ease-out 1 normal forwards running
-}
-
-// Card animations
-
-@keyframes move-deck {
-  from {
-    transform: translateX(0px)
-  }
-  to {
-    transform: translateX($deck-move)
-  }
-}
-
-@keyframes unmove-deck {
-  from {
-    transform: translateX($deck-move)
-  }
-  to {
-    transform: translateX(0px)
-  }
-}
-
-@keyframes draw {
-  0% {
-    transform: translate3d($card-width * -2 - $card-margin + $deck-move, 0px, 0px) rotateY(180deg)
-  }
-  35% {
-    transform: translate3d(-10px, 0px, $card-draw-height) rotateY(180deg)
-  }
-  45% {
-    transform: translate3d(-10px, 0px, $card-draw-height) rotateY(180deg)
-  }
-  80% {
-    transform: translate3d(0px, 0px, 0px) rotateY(0deg)
-  }
-  100% {
-    transform: translate3d(0px, 0px, 0px) rotateY(0deg)
-  }
-}
-
-@keyframes discard {
-  0% {
-    transform: translate3d(0px, 0px, 0px) rotateY(0deg)
-  }
-  35% {
-    transform: translate3d(10px, 0px, $card-draw-height) rotateY(180deg)
-  }
-  45% {
-    transform: translate3d(10px, 0px, $card-draw-height) rotateY(180deg)
-  }
-  80% {
-    transform: translate3d($card-margin + $card-width * 2, 0px, 0px) rotateY(180deg)
-  }
-  100% {
-    transform: translate3d($card-margin + $card-width * 2, 0px, 0px) rotateY(180deg)
-  }
-}
-
-@keyframes remove {
-  from { opacity: 1 }
-  to { opacity: 0 }
-}
-
-@keyframes shuffle {
-  0% { transform: translateX(0px) }
-  50% { transform: translateX($card-margin * -1 + $card-width * -2) }
-  90% { transform: translateX($card-margin * -2 + $card-width * -4) }
-  100% { transform: translateX($card-margin * -2 + $card-width * -4) }
-}
-
-// Flips
-
-@keyframes unflip-left {
-  from { transform: rotateY(180deg) }
-  to { transform: rotateY(0deg) }
-}
-
-@keyframes flip-left {
-  from { transform: rotateY(0deg) }
-  to { transform: rotateY(-180deg) }
-}
-
-@keyframes flip-right {
-  from { transform: rotateY(0deg) }
-  to { transform: rotateY(180deg) }
-}
-
-@keyframes unflip-right {
-  from { transform: rotateY(-180deg) }
-  to { transform: rotateY(0deg) }
+.padder {
+  height: 60vh;
+  .pattern { height: 100%; }
 }
