@@ -208,6 +208,6 @@ html, body {
 }
 
 .padder {
-  height: 60vh;
+  height: "calc(100vh - 2*%s - 4*%s)" % ($border-width $cell-size);
   .pattern { height: 100%; }
 }
