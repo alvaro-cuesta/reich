@@ -2,7 +2,6 @@
 
 - Make font size scale with viewport somehow
 - Fix count 1
-- Fix hot reload in css and jsx
 
 - Select start pattern
 - Pause/resume?

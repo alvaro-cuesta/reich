@@ -1,12 +1,10 @@
-# Card Game \[WORK IN PROGRESS]
+# Steven Reich's Clapping Music Trainer
 
-Roguelike card game engine.
+[Clapping Music](https://en.wikipedia.org/wiki/Clapping_Music) is a minimalist
+piece written by Steve Reich in 1972. It is written for two performers and is
+performed entirely by clapping.
 
-https://alvaro-cuesta.github.io/card-game/
-
-## Game definition
-
-
+https://alvaro-cuesta.github.io/reich/
 
 ## Development
 

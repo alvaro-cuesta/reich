@@ -43,7 +43,7 @@ switch(process.env.npm_lifecycle_event) {
     process.env.BABEL_ENV = 'production'
     config = merge(
       COMMON,
-      {output: {publicPath: '/card-game/'}},
+      {output: {publicPath: '/reich/'}},
       parts.productionSourceMap(),
       parts.productionEnv(),
       parts.extractVendor([
@@ -89,7 +89,7 @@ switch(process.env.npm_lifecycle_event) {
         port: PORT
       }),
       parts.hotOnly({
-        entry: 'card-game',
+        entry: 'reich',
         host: HOST,
         port: PORT
       }),

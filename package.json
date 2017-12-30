@@ -1,21 +1,22 @@
 {
-  "name": "card-game",
+  "name": "reich",
   "version": "0.1.0",
-  "description": "Roguelike card game engine.",
+  "description": "Steven Reich's Clapping Music Trainer.",
   "keywords": [
-    "card",
-    "game",
-    "roguelike"
+    "reich",
+    "clapping",
+    "music",
+    "trainer"
   ],
   "author": "Álvaro Cuesta <alvaro-cuesta@GitHub>",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://gihub.com/alvaro-cuesta/card-game"
+    "url": "https://gihub.com/alvaro-cuesta/reich"
   },
-  "homepage": "https://github.com/alvaro-cuesta/card-game#readme",
+  "homepage": "https://github.com/alvaro-cuesta/reich#readme",
   "bugs": {
-    "url": "https://github.com/alvaro-cuesta/card-game/issues"
+    "url": "https://github.com/alvaro-cuesta/reich/issues"
   },
   "main": "./lib/index.js",
   "scripts": {
