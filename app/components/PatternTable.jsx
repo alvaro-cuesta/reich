@@ -85,7 +85,7 @@ export default class PatternTable extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.scrollAnchor.scrollTop = this.rows[0] - this.scrollAnchor.offsetTop  + this.rows[0].offsetHeight;
+    this.scrollAnchor.scrollTop = this.rows[0] - this.scrollAnchor.offsetTop  + this.rows[0].offsetHeight - 4;
   }
 
   componentWillReceiveProps({pattern}) {
@@ -99,7 +99,7 @@ export default class PatternTable extends React.PureComponent {
   scrollToPattern(i) {
     smoothScroll(
       document.scrollingElement,
-      this.rows[i].offsetTop - this.scrollAnchor.offsetTop + this.rows[i].offsetHeight,
+      this.rows[i].offsetTop - this.scrollAnchor.offsetTop + this.rows[i].offsetHeight - /* HACK */ 4,
       SCROLL_DURATION,
       SCROLL_EASING
     );
@@ -121,11 +121,9 @@ export default class PatternTable extends React.PureComponent {
           <button className='noselect' onClick={buttonHandler}>{buttonLabel}</button>
         </div>
         <div className='pattern'>
-          {clapPattern.map((_, i) => {
-            return <div key={i} className='cell arrow'>
+          {clapPattern.map((_, i) => <div key={i} className='cell arrow'>
               {(originalPattern >= -1) && (i === pulse) ? '▼' : ''}
-            </div>;
-          })}
+          </div>)}
         </div>
       </div>
 

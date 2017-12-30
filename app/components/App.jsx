@@ -77,6 +77,8 @@ class Oscillator {
   }
 }
 
+const parseBool = (b) => b === 'true';
+
 export default class App extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -87,7 +89,11 @@ export default class App extends React.PureComponent {
     this.clap2 = new Oscillator(context, CLAP2_F);
     this.metronome = new Oscillator(context, METRONOME_ACCENT_F);
 
-    const parseBool = (b) => b === 'true';
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleSound = this.handleSound.bind(this);
+    this.handleStart = this.handleStart.bind(this);
+    this.handleStop = this.handleStop.bind(this);
+    this.handleSetting = this.handleSetting.bind(this);
 
     this.state = {
       tempo: localStorageGet('tempo', parseInt, 120),
@@ -104,8 +110,7 @@ export default class App extends React.PureComponent {
   }
 
   componentWillMount() {
-    this.keyDownListener = this.handleKeyDown.bind(this);
-    window.addEventListener('keydown', this.keyDownListener, false);
+    window.addEventListener('keydown', this.handleKeyDown, false);
   }
 
   componentWillUnmount() {
@@ -158,39 +163,20 @@ export default class App extends React.PureComponent {
     }
   }
 
-  handleTempo({target: {value}}) {
-    localStorage.setItem('tempo', value);
-    this.setState({tempo: parseInt(value)});
-  }
+  handleSetting(key, f) {
+    if (typeof f === 'undefined') {
+      f = (x) => x;
+    }
 
-  handleRepeats({target: {value}}) {
-    localStorage.setItem('repeats', value);
-    this.setState({repeats: parseInt(value)});
-  }
-
-  handleSwing({target: {value}}) {
-    localStorage.setItem('swing', value);
-    this.setState({swing: parseFloat(value)});
-  }
-
-  handleClap1({target: {checked}}) {
-    localStorage.setItem('clap1', checked);
-    this.setState({clap1: checked});
-  }
-
-  handleClap2({target: {checked}}) {
-    localStorage.setItem('clap2', checked);
-    this.setState({clap2: checked});
-  }
-
-  handleMetronome({target: {checked}}) {
-    localStorage.setItem('metronome', checked);
-    this.setState({metronome: checked});
-  }
-
-  handleCountMetronome({target: {checked}}) {
-    localStorage.setItem('countMetronome', checked);
-    this.setState({countMetronome: checked});
+    return ({target: {type, value, checked}}) => {
+        if (type === 'checkbox') {
+          localStorage.setItem(key, checked);
+          this.setState({[`${key}`]: f(checked)});
+        } else {
+          localStorage.setItem(key, value);
+          this.setState({[`${key}`]: f(value)});
+        }
+      }
   }
 
   handleStart({timeStamp}) {
@@ -221,7 +207,7 @@ export default class App extends React.PureComponent {
     this.timeInterval = setInterval(() => {
       this.setState(
         {now: context.currentTime},
-        this.handleSound.bind(this)
+        this.handleSound
       );
     }, 1);
   }
@@ -371,13 +357,13 @@ export default class App extends React.PureComponent {
 
     let buttonHandler, buttonLabel;
     if (pattern === undefined) {
-      buttonHandler = this.handleStart.bind(this);
+      buttonHandler = this.handleStart;
       buttonLabel = 'Start';
     } else if (pattern < 0) {
-      buttonHandler = this.handleStop.bind(this);
+      buttonHandler = this.handleStop;
       buttonLabel = Math.floor(pulse / 2) + 1;
     } else {
-      buttonHandler = this.handleStop.bind(this);
+      buttonHandler = this.handleStop;
       buttonLabel = 'Stop';
     }
 
@@ -386,35 +372,31 @@ export default class App extends React.PureComponent {
         <fieldset className='tempo'>
           <Input label='Tempo:' type='number'
             min={1} max={999} step={1} value={tempo}
-            onChange={this.handleTempo.bind(this)}
+            onChange={this.handleSetting('tempo', parseInt)}
           />
           <Input label='Repeats:' type='number'
             min={1} max={999} step={1} value={repeats}
-            onChange={this.handleRepeats.bind(this)}
+            onChange={this.handleSetting('repeats', parseInt)}
           />
           <Input label='Swing:' type='number'
             min={0.1} max={0.9} step={0.01} value={swing}
-            onChange={this.handleSwing.bind(this)}
+            onChange={this.handleSetting('swing', parseFloat)}
           />
         </fieldset>
 
         <fieldset>
           <div className='noselect'>Sounds:</div>
-          <Input label='Clap 1' type='checkbox'
-            checked={clap1}
-            onChange={this.handleClap1.bind(this)}
+          <Input label='Clap 1' type='checkbox' checked={clap1}
+            onChange={this.handleSetting('clap1')}
           />
-          <Input label='Clap 2' type='checkbox'
-            checked={clap2}
-            onChange={this.handleClap2.bind(this)}
+          <Input label='Clap 2' type='checkbox' checked={clap2}
+            onChange={this.handleSetting('clap2')}
           />
-          <Input label='Metronome' type='checkbox'
-            checked={metronome}
-            onChange={this.handleMetronome.bind(this)}
+          <Input label='Metronome' type='checkbox' checked={metronome}
+            onChange={this.handleSetting('metronome')}
           />
-          <Input label='Count' type='checkbox'
-            checked={countMetronome}
-            onChange={this.handleCountMetronome.bind(this)}
+          <Input label='Count' type='checkbox' checked={countMetronome}
+            onChange={this.handleSetting('countMetronome')}
           />
         </fieldset>
       </div>
