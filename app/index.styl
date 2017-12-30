@@ -1,6 +1,6 @@
 $palette = #222 #282828 #333 #383838 #aaa #d0d0d0 #e0e0e0 #fff;
 $border-width = 2px;
-$table-border = $border-width solid $palette[5];
+$table-border = $border-width solid $palette[4];
 $cell-size = 1.3em;
 $head-size = 4.5em;
 
@@ -12,8 +12,8 @@ html, body {
 }
 
 body, input, button {
-  color: $palette[6];
-  background-color: $palette[1];
+  color: $palette[5];
+  background-color: $palette[0];
 }
 
 label {
@@ -100,7 +100,7 @@ html, body {
   position: sticky;
   left: 0;
   z-index: 1000;
-  background-color: $palette[1];
+  background-color: $palette[0];
 }
 
 .pattern-clap1 {
@@ -117,11 +117,11 @@ html, body {
     height: $cell-size;
     background: linear-gradient(
       180deg,
-      $palette[1] 0%,
-      rgba($palette[1], .95) 25%,
-      rgba($palette[1], .8) 50%,
-      rgba($palette[1], .6) 75%,
-      rgba($palette[1], .1) 95%,
+      $palette[0] 0%,
+      rgba($palette[0], .95) 25%,
+      rgba($palette[0], .8) 50%,
+      rgba($palette[0], .6) 75%,
+      rgba($palette[0], .1) 95%,
       transparent
     );
   }
@@ -157,8 +157,8 @@ html, body {
     &::before { content: '●'; }
 
     &.clap {
-      color: $palette[7];
-      &.highlight { color: $palette[8]; }
+      color: $palette[6];
+      &.highlight { color: $palette[7]; }
       &.hit-good, &.hit-ok, &.hit-bad, &.no-hit {
         &::after {
           position: absolute;
@@ -175,8 +175,9 @@ html, body {
     }
 
     &.silence {
-      color: $palette[3];
+      color: $palette[2];
 
+      &.highlight { color: #444; }
       &.hit-good, &.hit-ok, &.hit-bad, &.no-hit {
         &::after {
           position: absolute;
@@ -199,8 +200,8 @@ html, body {
   }
 
   &.highlight .pattern {
-    background-color: $palette[2];
-    .silence { color: $palette[4]; }
+    background-color: $palette[1];
+    .silence { color: $palette[3]; }
   }
 }
 
