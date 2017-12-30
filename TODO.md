@@ -1,7 +1,7 @@
 # TODO:
 
 - Make font size scale with viewport somehow
-- Fix count 1
+- Fix count 1 in Firefox
 
 - Select start pattern
 - Pause/resume?
