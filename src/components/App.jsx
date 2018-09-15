@@ -2,6 +2,9 @@ import React from 'react'
 import { hot } from 'react-hot-loader'
 
 import PatternTable from 'components/PatternTable'
+import Input from 'components/Input'
+
+import Oscillator from '../Oscillator'
 
 const CLAP_PATTERN = [
   true,
@@ -32,64 +35,22 @@ const localStorageGet = (key, parser, defaultVal) => {
   return result !== null ? parser(result) : defaultVal
 }
 
-const Input = ({ label, ...props }) => (
-  <label>
-    {props.type !== 'checkbox' ? (
-      <span className="label noselect">{label}</span>
-    ) : null}
-    <input {...props} />
-    {props.type === 'checkbox' ? (
-      <span className="label noselect">{label}</span>
-    ) : null}
-  </label>
-)
-
-class Oscillator {
-  constructor(context, f) {
-    this.f = f
-    this.context = context
-
-    this.oscillator = context.createOscillator()
-    this.oscillator.type = 'square'
-    this.oscillator.frequency.value = f
-
-    this.gain = context.createGain()
-    this.gain.gain.value = 0
-
-    this.oscillator.start()
-    this.oscillator.connect(this.gain)
-
-    this.gain.connect(context.destination)
-  }
-
-  schedule(gain, start, end) {
-    this.gain.gain.setValueAtTime(gain, start)
-    this.gain.gain.setValueAtTime(0, end)
-  }
-
-  scheduleFrequency(frequency, start) {
-    this.oscillator.frequency.setValueAtTime(frequency, start)
-  }
-
-  cancelScheduledValues() {
-    let now = this.context.currentTime
-
-    this.oscillator.frequency.cancelScheduledValues(now)
-    this.gain.gain.cancelScheduledValues(now)
-
-    this.gain.gain.value = 0
-    this.oscillator.frequency.value = this.f
-  }
-
-  disconnect() {
-    this.gain.disconnect()
-    this.oscillator.disconnect()
-  }
-}
-
 const parseBool = (b) => b === 'true'
 
 class App extends React.PureComponent {
+  state = {
+    tempo: localStorageGet('tempo', parseInt, 120),
+    repeats: localStorageGet('repeats', parseInt, 4),
+    swing: localStorageGet('swing', parseFloat, 0.5),
+    clap1: localStorageGet('clap1', parseBool, true),
+    clap2: localStorageGet('clap2', parseBool, true),
+    metronome: localStorageGet('metronome', parseBool, false),
+    countMetronome: localStorageGet('countMetronome', parseBool, true),
+    startTime: false,
+    now: false,
+    userInput: false,
+  }
+
   constructor(props) {
     super(props)
 
@@ -98,25 +59,6 @@ class App extends React.PureComponent {
     this.clap1 = new Oscillator(context, CLAP1_F)
     this.clap2 = new Oscillator(context, CLAP2_F)
     this.metronome = new Oscillator(context, METRONOME_ACCENT_F)
-
-    this.handleKeyDown = this.handleKeyDown.bind(this)
-    this.handleSound = this.handleSound.bind(this)
-    this.handleStart = this.handleStart.bind(this)
-    this.handleStop = this.handleStop.bind(this)
-    this.handleSetting = this.handleSetting.bind(this)
-
-    this.state = {
-      tempo: localStorageGet('tempo', parseInt, 120),
-      repeats: localStorageGet('repeats', parseInt, 4),
-      swing: localStorageGet('swing', parseFloat, 0.5),
-      clap1: localStorageGet('clap1', parseBool, true),
-      clap2: localStorageGet('clap2', parseBool, true),
-      metronome: localStorageGet('metronome', parseBool, false),
-      countMetronome: localStorageGet('countMetronome', parseBool, true),
-      startTime: false,
-      now: false,
-      userInput: false,
-    }
   }
 
   componentWillMount() {
@@ -135,7 +77,7 @@ class App extends React.PureComponent {
 
   //
 
-  handleKeyDown({ repeat, key, keyCode, timeStamp }) {
+  handleKeyDown = ({ repeat, key, keyCode, timeStamp }) => {
     if (repeat) return
 
     let { userInput } = this.state
@@ -175,7 +117,7 @@ class App extends React.PureComponent {
     }
   }
 
-  handleSetting(key, f) {
+  handleSetting = (key, f) => {
     if (typeof f === 'undefined') {
       f = (x) => x
     }
@@ -191,7 +133,7 @@ class App extends React.PureComponent {
     }
   }
 
-  handleStart({ timeStamp }) {
+  handleStart = ({ timeStamp }) => {
     let { context } = this.props
     let { countMetronome } = this.state
 
@@ -221,7 +163,7 @@ class App extends React.PureComponent {
     }, 1)
   }
 
-  handleStop() {
+  handleStop = () => {
     let { context } = this.props
 
     clearInterval(this.timeInterval)
@@ -238,7 +180,7 @@ class App extends React.PureComponent {
 
   //
 
-  handleSound() {
+  handleSound = () => {
     let { repeats } = this.state
     let { pattern, pulse, totalPulses } = this.getPosition()
 
