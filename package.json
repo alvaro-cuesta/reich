@@ -1,58 +1,48 @@
 {
   "name": "reich",
-  "version": "0.1.0",
-  "description": "Steven Reich's Clapping Music Trainer.",
+  "version": "0.2.0",
+  "description": "Steven Reich's Clapping Music Trainer",
+  "private": true,
+  "scripts": {
+    "start": "webpack-serve --config webpack.config.js",
+    "public": "webpack-serve --config webpack.config.js",
+    "build": "webpack --env.colors --progress --profile --bail",
+    "build:gh-pages": "webpack --env.colors --progress --profile --bail",
+    "preversion": "yarn build",
+    "deploy": "yarn deploy:gh-pages",
+    "predeploy:gh-pages": "yarn build:gh-pages",
+    "deploy:gh-pages": "webpack-parts-deploy-gh-pages",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gihub.com/alvaro-cuesta/reich"
+  },
+  "homepage": "https://github.com/alvaro-cuesta/reich#readme",
+  "bugs": "https://github.com/alvaro-cuesta/reich/issues",
   "keywords": [
     "reich",
     "clapping",
     "music",
     "trainer"
   ],
-  "author": "Álvaro Cuesta <alvaro-cuesta@GitHub>",
+  "author": {
+    "name": "Álvaro Cuesta",
+    "url": "https://alvaro-cuesta.github.io/"
+  },
   "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://gihub.com/alvaro-cuesta/reich"
-  },
-  "homepage": "https://github.com/alvaro-cuesta/reich#readme",
-  "bugs": {
-    "url": "https://github.com/alvaro-cuesta/reich/issues"
-  },
-  "main": "./lib/index.js",
-  "scripts": {
-    "build": "webpack --progress --profile --colors --bail",
-    "build:gh-pages": "webpack --progress --profile --colors --bail",
-    "dev": "webpack-dev-server --progress --profile --colors",
-    "watch": "webpack -w --progress --profile --colors",
-    "preversion": "npm run build",
-    "deploy": "npm run deploy:gh-pages",
-    "predeploy:gh-pages": "npm run build:gh-pages",
-    "deploy:gh-pages": "node ./bin/deploy-gh-pages.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "devDependencies": {
+    "@alvaro-cuesta/webpack-parts": "^0.12.2",
+    "react-hot-loader": "^4.3.8",
+    "webpack": "^4.19.0",
+    "webpack-cli": "^3.1.0",
+    "webpack-serve": "^2.0.2"
   },
   "dependencies": {
-    "classnames": "^2.2.5",
-    "prop-types": "^15.6.0",
-    "react": "^15.6.2",
-    "react-dom": "^15.6.2"
-  },
-  "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-3": "^6.24.1",
-    "clean-webpack-plugin": "^0.1.17",
-    "css-loader": "^0.28.7",
-    "extract-text-webpack-plugin": "^3.0.2",
-    "gh-pages": "^1.1.0",
-    "html-webpack-plugin": "^2.30.1",
-    "react-hot-loader": "^3.1.3",
-    "style-loader": "^0.19.0",
-    "stylus": "^0.54.5",
-    "stylus-loader": "^3.0.1",
-    "webpack": "^3.8.1",
-    "webpack-dev-server": "^2.9.5",
-    "webpack-merge": "^4.1.1"
+    "@babel/runtime": "^7.0.0",
+    "classnames": "^2.2.6",
+    "prop-types": "^15.6.2",
+    "react": "^16.5.1",
+    "react-dom": "^16.5.1"
   }
 }

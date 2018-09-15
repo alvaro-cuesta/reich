@@ -1,19 +1,24 @@
-$palette = #222 #282828 #333 #383838 #aaa #d0d0d0 #e0e0e0 #fff;
-$border-width = 2px;
-$table-border = $border-width solid $palette[4];
-$cell-size = 1.3em;
-$head-size = 4.5em;
+$palette: (#222, #282828, #333, #383838, #aaa, #d0d0d0, #e0e0e0, #fff);
+$border-width: 2px;
+$table-border: $border-width solid nth($palette, 5);
+$cell-size: 1.3em;
+$head-size: 4.5em;
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
 
-body, input, button {
-  color: $palette[5];
-  background-color: $palette[0];
+body,
+input,
+button {
+  color: nth($palette, 6);
+  background-color: nth($palette, 1);
 }
 
 label {
@@ -26,7 +31,9 @@ label {
   }
 }
 
-input[type='checkbox'] { margin-right: 0.25em; }
+input[type='checkbox'] {
+  margin-right: 0.25em;
+}
 
 .tempo input {
   width: 4em;
@@ -53,16 +60,17 @@ fieldset {
   cursor: default;
 
   -webkit-touch-callout: none;
-    -webkit-user-select: none;
-     -khtml-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 // Layout
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
 }
@@ -96,11 +104,12 @@ html, body {
   top: 0;
 }
 
-.arrow-row, .pattern-clap1 {
+.arrow-row,
+.pattern-clap1 {
   position: sticky;
   left: 0;
   z-index: 1000;
-  background-color: $palette[0];
+  background-color: nth($palette, 1);
 }
 
 .pattern-clap1 {
@@ -111,17 +120,17 @@ html, body {
   &::after {
     position: absolute;
     content: '';
-    bottom: "calc(-%s - %s)" % ($cell-size $border-width);
-    left: "calc(%s + %s)" % ($head-size $border-width);
+    bottom: calc(-#{$cell-size} - #{$border-width});
+    left: calc(#{$head-size} + #{$border-width});
     width: $cell-size * 12;
     height: $cell-size;
     background: linear-gradient(
       180deg,
-      $palette[0] 0%,
-      rgba($palette[0], .95) 25%,
-      rgba($palette[0], .8) 50%,
-      rgba($palette[0], .6) 75%,
-      rgba($palette[0], .1) 95%,
+      nth($palette, 1) 0%,
+      rgba(nth($palette, 1), 0.95) 25%,
+      rgba(nth($palette, 1), 0.8) 50%,
+      rgba(nth($palette, 1), 0.6) 75%,
+      rgba(nth($palette, 1), 0.1) 95%,
       transparent
     );
   }
@@ -129,9 +138,14 @@ html, body {
 
 //
 
-.head, .cell, .pattern { display: inline-block; }
+.head,
+.cell,
+.pattern {
+  display: inline-block;
+}
 
-.head, .cell {
+.head,
+.cell {
   text-align: center;
   height: $cell-size;
 }
@@ -154,12 +168,19 @@ html, body {
   &:not(.empty) .pulse {
     position: relative;
 
-    &::before { content: '●'; }
+    &::before {
+      content: '●';
+    }
 
     &.clap {
-      color: $palette[6];
-      &.highlight { color: $palette[7]; }
-      &.hit-good, &.hit-ok, &.hit-bad, &.no-hit {
+      color: nth($palette, 7);
+      &.highlight {
+        color: nth($palette, 8);
+      }
+      &.hit-good,
+      &.hit-ok,
+      &.hit-bad,
+      &.no-hit {
         &::after {
           position: absolute;
           top: 0;
@@ -168,17 +189,30 @@ html, body {
           width: 100%;
         }
       }
-      &.hit-good { color: #BAFFC9; }
-      &.hit-ok { color: #FFFFBA; }
-      &.hit-bad { color: #FFCE96; }
-      &.no-hit { color: #FFB3BA; }
+      &.hit-good {
+        color: #baffc9;
+      }
+      &.hit-ok {
+        color: #ffffba;
+      }
+      &.hit-bad {
+        color: #ffce96;
+      }
+      &.no-hit {
+        color: #ffb3ba;
+      }
     }
 
     &.silence {
-      color: $palette[2];
+      color: nth($palette, 3);
 
-      &.highlight { color: #444; }
-      &.hit-good, &.hit-ok, &.hit-bad, &.no-hit {
+      &.highlight {
+        color: #444;
+      }
+      &.hit-good,
+      &.hit-ok,
+      &.hit-bad,
+      &.no-hit {
         &::after {
           position: absolute;
           top: 0;
@@ -188,24 +222,35 @@ html, body {
         }
       }
 
-      &.hit-good, &.hit-ok, &.hit-bad {
+      &.hit-good,
+      &.hit-ok,
+      &.hit-bad {
         color: #443133;
-        &::after { color: rgba(#FFB3BA, 0.2); }
+        &::after {
+          color: rgba(#ffb3ba, 0.2);
+        }
       }
+
       &.no-hit {
         color: #314433;
-        &::after { color: rgba(#BAFFC9, 0.2); }
+        &::after {
+          color: rgba(#baffc9, 0.2);
+        }
       }
     }
   }
 
   &.highlight .pattern {
-    background-color: $palette[1];
-    .silence { color: $palette[3]; }
+    background-color: nth($palette, 2);
+    .silence {
+      color: nth($palette, 4);
+    }
   }
 }
 
 .padder {
-  height: "calc(100vh - 2*%s - 4*%s)" % ($border-width $cell-size);
-  .pattern { height: 100%; }
+  height: calc(100vh - 2 * #{$border-width} - 4 * #{$cell-size});
+  .pattern {
+    height: 100%;
+  }
 }
