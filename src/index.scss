@@ -4,6 +4,8 @@ $table-border: $border-width solid nth($palette, 5);
 $cell-size: 1.3em;
 $head-size: 4.5em;
 
+$play-stop-button-size: 2em;
+
 * {
   box-sizing: border-box;
 }
@@ -18,7 +20,8 @@ body,
 input,
 button {
   color: nth($palette, 6);
-  background-color: nth($palette, 1);
+  background-color: #333;
+  z-index: 9999;
 }
 
 label {
@@ -41,13 +44,24 @@ input[type='checkbox'] {
 }
 
 button {
-  height: 100%;
-  width: 100%;
+  position: fixed;
+  display: block;
+  right: 0.5em;
+  bottom: 0.5em;
+  width: $play-stop-button-size;
+  height: $play-stop-button-size;
+  line-height: $play-stop-button-size;
+  font-size: $play-stop-button-size;
+  text-align: center;
+  border-radius: 100%;
+  background-color: #282828;
 }
 
 .controls {
   display: flex;
   align-items: flex-start;
+  z-index: 2000;
+  background-color: #222;
 }
 
 fieldset {
@@ -79,178 +93,111 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.pattern-table {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   font-size: 2vw;
 }
 
-// Pattern view
-
-.pattern {
-  border-left: $table-border;
-  border-right: $table-border;
+.patterns {
+  background-color: #222;
 }
 
-.arrow-row .pattern {
-  border-top: $table-border;
+.clap2 .patterns {
+  padding-top: $cell-size;
+  padding-bottom: calc(100vh - 4 * #{$cell-size});
 }
 
-.arrow-row {
-  background-color: black;
-  top: 0;
-}
-
-.arrow-row,
-.pattern-clap1 {
-  position: sticky;
-  left: 0;
-  z-index: 1000;
-  background-color: nth($palette, 1);
-}
-
-.pattern-clap1 {
-  top: $cell-size;
-  border-top: $table-border;
-  border-bottom: $table-border;
-
-  &::after {
-    position: absolute;
-    content: '';
-    bottom: calc(-#{$cell-size} - #{$border-width});
-    left: calc(#{$head-size} + #{$border-width});
-    width: $cell-size * 12;
-    height: $cell-size;
-    background: linear-gradient(
-      180deg,
-      nth($palette, 1) 0%,
-      rgba(nth($palette, 1), 0.95) 25%,
-      rgba(nth($palette, 1), 0.8) 50%,
-      rgba(nth($palette, 1), 0.6) 75%,
-      rgba(nth($palette, 1), 0.1) 95%,
-      transparent
-    );
-  }
-}
-
-//
-
-.head,
-.cell,
-.pattern {
-  display: inline-block;
-}
-
-.head,
-.cell {
-  text-align: center;
+.rest::before {
+  content: '';
+  display: block;
+  width: 100%;
   height: $cell-size;
 }
 
-.head {
-  width: $head-size;
-  vertical-align: top;
+/**/
 
-  // Hack!
-  position: relative;
-  top: -2px;
+.clap1 {
+  z-index: 500;
 }
+
+.clap2 {
+  z-index: 200;
+}
+
+/**/
+
+.clap1 .head,
+.clap1 .rest::before {
+  margin-top: $cell-size;
+}
+
+.clap2 .head,
+.clap2 .rest::before {
+  margin-top: calc((1 + var(--pattern)) * #{$cell-size});
+}
+
+/**/
+
+.clap1 .head,
+.clap1 .rest::before {
+  background-color: #0e4866;
+}
+
+.clap2 .head,
+.clap2 .rest::before {
+  background-color: #672f2f;
+}
+
+/**/
+
+.clap1 .heads::after {
+  box-shadow: -10px 10px 40px -10px #000 inset;
+}
+
+.clap1 .rest::after {
+  box-shadow: 10px 10px 40px -10px #000 inset;
+}
+
+.clap2 .heads::after {
+  box-shadow: -10px 0px 40px -10px #000 inset;
+}
+
+.clap2 .rest::after {
+  box-shadow: 10px 0px 40px -10px #000 inset;
+}
+
+/**/
 
 .cell {
+  display: inline-block;
   width: $cell-size;
-  vertical-align: middle;
+  height: $cell-size;
+  text-align: center;
 }
 
-.clap-row {
-  &:not(.empty) .pulse {
-    position: relative;
-
-    &::before {
-      content: '●';
-    }
-
-    &.clap {
-      color: nth($palette, 7);
-      &.highlight {
-        color: nth($palette, 8);
-      }
-      &.hit-good,
-      &.hit-ok,
-      &.hit-bad,
-      &.no-hit {
-        &::after {
-          position: absolute;
-          top: 0;
-          left: 0;
-          content: '○';
-          width: 100%;
-        }
-      }
-      &.hit-good {
-        color: #baffc9;
-      }
-      &.hit-ok {
-        color: #ffffba;
-      }
-      &.hit-bad {
-        color: #ffce96;
-      }
-      &.no-hit {
-        color: #ffb3ba;
-      }
-    }
-
-    &.silence {
-      color: nth($palette, 3);
-
-      &.highlight {
-        color: #444;
-      }
-      &.hit-good,
-      &.hit-ok,
-      &.hit-bad,
-      &.no-hit {
-        &::after {
-          position: absolute;
-          top: 0;
-          left: 0;
-          content: '○';
-          width: 100%;
-        }
-      }
-
-      &.hit-good,
-      &.hit-ok,
-      &.hit-bad {
-        color: #443133;
-        &::after {
-          color: rgba(#ffb3ba, 0.2);
-        }
-      }
-
-      &.no-hit {
-        color: #314433;
-        &::after {
-          color: rgba(#baffc9, 0.2);
-        }
-      }
-    }
-  }
-
-  &.highlight .pattern {
-    background-color: nth($palette, 2);
-    .silence {
-      color: nth($palette, 4);
-    }
-  }
+.head {
+  line-height: $cell-size;
+  width: $head-size;
+  height: $cell-size;
+  text-align: center;
 }
 
-.padder {
-  height: calc(100vh - 2 * #{$border-width} - 4 * #{$cell-size});
-  .pattern {
-    height: 100%;
-  }
+.rest {
+  flex-grow: 1;
+}
+
+.heads::after,
+.rest::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.heads,
+.rest {
+  position: relative;
+  top: 0;
+  left: 0;
 }

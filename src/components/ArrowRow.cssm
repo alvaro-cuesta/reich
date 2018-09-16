@@ -1,0 +1,12 @@
+.arrow {
+  color: #333;
+}
+
+.arrow::after {
+  content: '▼';
+  font-size: 50%;
+}
+
+.arrow.highlight {
+  color: #fff;
+}

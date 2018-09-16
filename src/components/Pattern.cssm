@@ -1,0 +1,81 @@
+.pattern.highlight {
+  background-color: #282828;
+}
+
+/**/
+
+.pulse {
+  position: relative;
+}
+
+.pulse::before {
+  content: '●';
+}
+
+/**/
+
+.clap::after,
+.silence::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '○';
+  width: 100%;
+}
+
+/**/
+
+.clap {
+  color: #e0e0e0;
+}
+
+.clap.highlight:not(.hitGood):not(.hitOk):not(.hitBad):not(.noHit) {
+  color: #fff;
+}
+
+.clap.hitGood {
+  color: #baffc9;
+}
+.clap.hitOk {
+  color: #ffffba;
+}
+.clap.hitBad {
+  color: #ffce96;
+}
+.clap.noHit {
+  color: #ffb3ba;
+}
+
+/**/
+
+.silence {
+  color: #333;
+}
+
+.silence.highlight:not(.hitGood):not(.hitOk):not(.hitBad):not(.noHit) {
+  color: #444;
+}
+
+.pattern.highlight .silence:not(.hitGood):not(.hitOk):not(.hitBad):not(.noHit) {
+  color: #383838;
+}
+
+.silence.hitGood,
+.silence.hitOk,
+.silence.hitBad {
+  color: #443133;
+}
+
+.silence.hitGood::after,
+.silence.hitOk::after,
+.silence.hitBad::after {
+  color: rgba(255, 179, 186, 0.2);
+}
+
+.silence.noHit {
+  color: #314433;
+}
+
+.silence.noHit::after {
+  color: rgba(186, 255, 201, 0.2);
+}

@@ -1,4 +1,5 @@
 import React from 'react'
+import cx from 'classnames'
 import { hot } from 'react-hot-loader'
 
 import PatternTable from 'components/PatternTable'
@@ -78,6 +79,7 @@ class App extends React.PureComponent {
   //
 
   handleKeyDown = ({ repeat, key, keyCode, timeStamp }) => {
+    console.log(keyCode)
     if (repeat) return
 
     let { userInput } = this.state
@@ -323,17 +325,28 @@ class App extends React.PureComponent {
     let buttonHandler, buttonLabel
     if (pattern === undefined) {
       buttonHandler = this.handleStart
-      buttonLabel = 'Start'
+      buttonLabel = '▶'
     } else if (pattern < 0) {
       buttonHandler = this.handleStop
       buttonLabel = Math.floor(pulse / 2) + 1
     } else {
       buttonHandler = this.handleStop
-      buttonLabel = 'Stop'
+      buttonLabel = '⏹'
     }
 
     return (
       <div className="reich-app">
+        <h1>Reich Clapping Music Trainer</h1>
+        <p>
+          <a
+            href="https://en.wikipedia.org/wiki/Clapping_Music"
+            target="_blank"
+          >
+            Clapping Music
+          </a>{' '}
+          is a minimalist piece written by Steve Reich in 1972. It is written
+          for two performers and is performed entirely by clapping.
+        </p>
         <div className="controls">
           <fieldset className="tempo">
             <Input
@@ -393,16 +406,19 @@ class App extends React.PureComponent {
             />
           </fieldset>
         </div>
-
+        <div className="" />
         <PatternTable
-          buttonHandler={buttonHandler}
-          buttonLabel={buttonLabel}
           clapPattern={CLAP_PATTERN}
           pattern={pattern}
           pulse={pulse}
           repeats={repeats}
           userInput={userInput}
         />
+        area for player 1 on mobile area for player 2 on mobile github link
+        keyboard icon desktop menu on left
+        <button className="noselect" onClick={buttonHandler}>
+          {buttonLabel}
+        </button>
       </div>
     )
   }
