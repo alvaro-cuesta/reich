@@ -8,7 +8,12 @@ import Oscillator from '../Oscillator'
 import useInputInteger from '../hooks/useInputInteger'
 import useInputFloat from '../hooks/useInputFloat'
 import useInputCheckbox from '../hooks/useInputCheckbox'
-import { getPosition, getPulseStart } from '../business/tempo'
+import {
+  getPosition,
+  getPulseDiff,
+  getPulseStart,
+  getSecsPerBeat,
+} from '../business/tempo'
 
 const CLAP_PATTERN = [
   true,
@@ -56,7 +61,7 @@ const App = ({ context }) => {
   const lastPulseRef = useRef(null)
   const timeStampRef = useRef(null)
 
-  const secsPerBeat = 60 / tempo.value
+  const secsPerBeat = getSecsPerBeat(tempo.value)
 
   const handleStop = useCallback(() => {
     clearInterval(timeIntervalRef.current)
@@ -216,52 +221,6 @@ const App = ({ context }) => {
 
   //
 
-  const getPulseDiff = useCallback(
-    (delta) => {
-      let { totalPulses } = getPosition(
-        tempo.value,
-        swing.value,
-        CLAP_PATTERN.length,
-        state.startTime,
-        state.now,
-      )
-
-      let now = context.currentTime - delta / 1000
-
-      let currPulseDiff =
-        (now -
-          getPulseStart(
-            tempo.value,
-            swing.value,
-            state.startTime,
-            totalPulses,
-          )) /
-        (secsPerBeat * swing.value)
-      let nextPulseDiff =
-        (getPulseStart(
-          tempo.value,
-          swing.value,
-          state.startTime,
-          totalPulses + 1,
-        ) -
-          now) /
-        (secsPerBeat * (1 - swing.value))
-
-      return {
-        currPulseDiff,
-        nextPulseDiff,
-      }
-    },
-    [
-      secsPerBeat,
-      context,
-      tempo.value,
-      swing.value,
-      state.startTime,
-      state.now,
-    ],
-  )
-
   useEffect(() => {
     const handleKeyDown = ({ repeat, key, keyCode, timeStamp }) => {
       if (repeat) return
@@ -276,6 +235,12 @@ const App = ({ context }) => {
       )
 
       let { currPulseDiff, nextPulseDiff } = getPulseDiff(
+        tempo.value,
+        swing.value,
+        CLAP_PATTERN.length,
+        state.startTime,
+        state.now,
+        context.currentTime,
         performance.now() - timeStamp,
       )
 
@@ -316,12 +281,12 @@ const App = ({ context }) => {
       window.removeEventListener('keydown', handleKeyDown, false)
     }
   }, [
-    getPulseDiff,
     state.userInput,
     tempo.value,
     swing.value,
     state.startTime,
     state.now,
+    context,
   ])
 
   // RENDER
