@@ -19,14 +19,14 @@ const ClapRow = React.forwardRef(
       <div className="head">{head}</div>
       <div className="pattern">
         {clapPattern.map((_, i) => {
-          let shifted = (i + shift) % clapPattern.length
-          let isClap = clapPattern[shifted]
+          const shifted = (i + shift) % clapPattern.length
+          const isClap = clapPattern[shifted]
           let className = `cell pulse ${isClap ? 'clap' : 'silence'} ${
             i === highlightPulse ? 'highlight' : ''
           } `
 
-          let didntHit = userInput === undefined || userInput[i] === undefined
-          let colorClass = didntHit
+          const didntHit = userInput === undefined || userInput[i] === undefined
+          const colorClass = didntHit
             ? 'no-hit'
             : userInput[i] > 2 / 3
             ? 'hit-bad'

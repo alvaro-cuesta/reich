@@ -79,21 +79,21 @@ const App = ({ context }) => {
 
   const schedulePulseSound = useCallback(
     (pulse, pattern, totalPulses, instant) => {
-      let pulseStart = getPulseStart(
+      const pulseStart = getPulseStart(
         tempo.value,
         swing.value,
         state.startTime,
         totalPulses,
       )
-      let pulseEnd = pulseStart + CLAP_LENGTH
-      let gain = pulse === 0 ? ACCENT_GAIN : GAIN
+      const pulseEnd = pulseStart + CLAP_LENGTH
+      const gain = pulse === 0 ? ACCENT_GAIN : GAIN
 
       if (pattern >= 0) {
         if (clap1.checked && CLAP_PATTERN[pulse % CLAP_PATTERN.length]) {
           clap1Ref.current.schedule(gain, pulseStart, pulseEnd)
         }
 
-        let shift = Math.floor(pattern / repeats.value)
+        const shift = Math.floor(pattern / repeats.value)
         if (
           clap2.checked &&
           CLAP_PATTERN[(shift + pulse) % CLAP_PATTERN.length]
@@ -102,8 +102,8 @@ const App = ({ context }) => {
         }
       }
 
-      let isMetronome = metronome.checked && pattern >= 0 && pulse % 2 === 0
-      let isCountMetronome =
+      const isMetronome = metronome.checked && pattern >= 0 && pulse % 2 === 0
+      const isCountMetronome =
         countMetronome.checked && pattern === -1 && pulse % 2 === 0
       if (isMetronome || isCountMetronome) {
         metronomeRef.current.scheduleFrequency(
@@ -127,7 +127,7 @@ const App = ({ context }) => {
 
   // handleSound
   useEffect(() => {
-    let { pattern, pulse, totalPulses } = getPosition(
+    const { pattern, pulse, totalPulses } = getPosition(
       tempo.value,
       swing.value,
       CLAP_PATTERN.length,
@@ -150,17 +150,19 @@ const App = ({ context }) => {
 
     // Schedule _next_ pulse
 
-    pulse += 1
-    totalPulses += 1
+    let schedulePulse = pulse
+    let schedulePattern = pattern
 
-    if (pulse === CLAP_PATTERN.length) {
-      pulse = 0
-      pattern += 1
+    schedulePulse += 1
+
+    if (schedulePulse === CLAP_PATTERN.length) {
+      schedulePulse = 0
+      schedulePattern += 1
     }
 
     if (pattern >= (CLAP_PATTERN.length + 1) * repeats.value) return
 
-    schedulePulseSound(pulse, pattern, totalPulses)
+    schedulePulseSound(schedulePulse, schedulePattern, totalPulses + 1)
   }, [
     handleStop,
     schedulePulseSound,
@@ -177,7 +179,7 @@ const App = ({ context }) => {
     ({ timeStamp }) => {
       context.resume()
 
-      let now = context.currentTime
+      const now = context.currentTime
 
       clap1Ref.current.cancelScheduledValues()
       clap2Ref.current.cancelScheduledValues()
@@ -228,7 +230,7 @@ const App = ({ context }) => {
     const handleKeyDown = ({ repeat, key, keyCode, timeStamp }) => {
       if (repeat) return
 
-      let { pattern, pulse } = getPosition(
+      const { pattern, pulse } = getPosition(
         tempo.value,
         swing.value,
         CLAP_PATTERN.length,
@@ -236,7 +238,7 @@ const App = ({ context }) => {
         state.now,
       )
 
-      let { currPulseDiff, nextPulseDiff } = getPulseDiff(
+      const { currPulseDiff, nextPulseDiff } = getPulseDiff(
         tempo.value,
         swing.value,
         CLAP_PATTERN.length,
@@ -257,17 +259,19 @@ const App = ({ context }) => {
           if (currPulseDiff < nextPulseDiff) {
             userInput[pattern][pulse] = currPulseDiff
           } else {
-            pulse += 1
-            if (pulse === CLAP_PATTERN.length) {
-              pulse = 0
-              pattern += 1
+            let actualPulse = pulse + 1
+            let actualPattern = pattern
 
-              if (userInput[pattern] === undefined) {
-                userInput[pattern] = []
+            if (actualPulse === CLAP_PATTERN.length) {
+              actualPulse = 0
+              actualPattern += 1
+
+              if (userInput[actualPattern] === undefined) {
+                userInput[actualPattern] = []
               }
             }
 
-            userInput[pattern][pulse] = nextPulseDiff
+            userInput[actualPattern][actualPulse] = nextPulseDiff
           }
 
           return userInput
@@ -288,7 +292,7 @@ const App = ({ context }) => {
 
   // RENDER
 
-  let { pattern, pulse } = getPosition(
+  const { pattern, pulse } = getPosition(
     tempo.value,
     swing.value,
     CLAP_PATTERN.length,

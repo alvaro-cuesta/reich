@@ -19,7 +19,7 @@ const PatternTable = ({
   userInput,
   className,
 }) => {
-  let originalPattern = pattern
+  const originalPattern = pattern
 
   if (pattern === undefined || pattern <= 0) pattern = 0
 

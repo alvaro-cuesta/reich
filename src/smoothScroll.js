@@ -8,12 +8,12 @@ export const easeOutSine = (t, b, c, d) =>
   c * Math.sin((t / d) * (Math.PI / 2)) + b
 
 export const smoothScroll = (element, position, duration, easingFn) => {
-  let originalPosition = element.scrollTop
-  let dx = position - element.scrollTop
-  let startTime = performance.now()
+  const originalPosition = element.scrollTop
+  const dx = position - element.scrollTop
+  const startTime = performance.now()
 
-  let scroll = () => {
-    let dt = performance.now() - startTime
+  const scroll = () => {
+    const dt = performance.now() - startTime
 
     if (dt > duration) {
       element.scrollTop = position
