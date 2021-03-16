@@ -62,8 +62,6 @@ const App = ({ context }) => {
   const lastPulseRef = useRef(null)
   const timeStampRef = useRef(null)
 
-  const secsPerBeat = getSecsPerBeat(tempo.value)
-
   const handleStop = useCallback(() => {
     clearInterval(timeIntervalRef.current)
 
@@ -190,7 +188,8 @@ const App = ({ context }) => {
       lastPulseRef.current = null
 
       setState({
-        startTime: now + (secsPerBeat / 2) * CLAP_PATTERN.length,
+        startTime:
+          now + (getSecsPerBeat(tempo.value) / 2) * CLAP_PATTERN.length,
         now: now,
       })
 
@@ -207,7 +206,7 @@ const App = ({ context }) => {
         }))
       }, 1)
     },
-    [context, secsPerBeat, countMetronome.checked],
+    [context, tempo.value, countMetronome.checked],
   )
 
   useEffect(() => {
@@ -235,17 +234,17 @@ const App = ({ context }) => {
         swing.value,
         CLAP_PATTERN.length,
         state.startTime,
-        state.now,
+        context.currentTime,
       )
+
+      const eventTimeFix = (performance.now() - timeStamp) / 1000
 
       const { currPulseDiff, nextPulseDiff } = getPulseDiff(
         tempo.value,
         swing.value,
         CLAP_PATTERN.length,
         state.startTime,
-        state.now,
-        context.currentTime,
-        performance.now() - timeStamp,
+        context.currentTime - eventTimeFix,
       )
 
       if (CLAP1_KEYS.includes(keyCode)) {
@@ -288,7 +287,7 @@ const App = ({ context }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown, false)
     }
-  }, [tempo.value, swing.value, state.startTime, state.now, context])
+  }, [tempo.value, swing.value, state.startTime, context])
 
   // RENDER
 
@@ -297,7 +296,7 @@ const App = ({ context }) => {
     swing.value,
     CLAP_PATTERN.length,
     state.startTime,
-    state.now,
+    context.currentTime,
   )
 
   let buttonHandler, buttonLabel

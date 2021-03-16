@@ -8,14 +8,14 @@ export const getPosition = (
   bpm,
   swing,
   pulsesPerPattern,
-  stateStartTime,
-  stateNow,
+  startTime,
+  currentTime,
 ) => {
-  if (stateStartTime === null) {
+  if (startTime === null) {
     return {}
   }
 
-  const totalBeats = (stateNow - stateStartTime) / getSecsPerBeat(bpm)
+  const totalBeats = (currentTime - startTime) / getSecsPerBeat(bpm)
 
   const totalPulses =
     Math.floor(totalBeats) * PULSES_PER_BEAT +
@@ -28,42 +28,37 @@ export const getPosition = (
   }
 }
 
-export const getPulseStart = (bpm, swing, stateStartTime, totalPulses) => {
+export const getPulseStart = (bpm, swing, startTime, totalPulses) => {
   const totalBeats =
     Math.floor(totalPulses / PULSES_PER_BEAT) +
     (totalPulses % PULSES_PER_BEAT === 0 ? 0 : swing)
 
-  return stateStartTime + totalBeats * getSecsPerBeat(bpm)
+  return startTime + totalBeats * getSecsPerBeat(bpm)
 }
 
 export const getPulseDiff = (
   bpm,
   swing,
   pulsesPerPattern,
-  // TODO: Too many time types!
-  stateStartTime,
-  stateNow,
-  contextCurrentTime,
-  delta,
+  startTime,
+  currentTime,
 ) => {
   const { totalPulses } = getPosition(
     bpm,
     swing,
     pulsesPerPattern,
-    stateStartTime,
-    stateNow,
+    startTime,
+    currentTime,
   )
-
-  const now = contextCurrentTime - delta / 1000
 
   const secsPerBeat = getSecsPerBeat(bpm)
 
   const currPulseDiff =
-    (now - getPulseStart(bpm, swing, stateStartTime, totalPulses)) /
+    (currentTime - getPulseStart(bpm, swing, startTime, totalPulses)) /
     (secsPerBeat * swing)
 
   const nextPulseDiff =
-    (getPulseStart(bpm, swing, stateStartTime, totalPulses + 1) - now) /
+    (getPulseStart(bpm, swing, startTime, totalPulses + 1) - currentTime) /
     (secsPerBeat * (1 - swing))
 
   return {
