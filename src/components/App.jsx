@@ -41,9 +41,9 @@ const CLAP2_KEYS = [77]
 
 const App = ({ context }) => {
   const [state, setState] = useState({
-    startTime: false,
-    now: false,
-    userInput: false,
+    startTime: null,
+    now: null,
+    userInput: [],
   })
 
   const tempo = useInputInteger('tempo', { min: 1, max: 999, step: 1 }, 120)
@@ -72,8 +72,8 @@ const App = ({ context }) => {
 
     setState((state) => ({
       ...state,
-      startTime: false,
-      now: false,
+      startTime: null,
+      now: null,
     }))
   }, [])
 
@@ -140,7 +140,7 @@ const App = ({ context }) => {
       return
     }
 
-    if (lastPulseRef.current === false) {
+    if (lastPulseRef.current === null) {
       // Just started: schedfule first pulse
       lastPulseRef.current = 0
     } else {
@@ -185,7 +185,7 @@ const App = ({ context }) => {
 
       timeStampRef.current = timeStamp
 
-      lastPulseRef.current = false
+      lastPulseRef.current = null
 
       setState((state) => ({
         ...state,

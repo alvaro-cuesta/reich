@@ -11,7 +11,7 @@ export const getPosition = (
   stateStartTime,
   stateNow,
 ) => {
-  if (stateStartTime === false) {
+  if (stateStartTime === null) {
     return {}
   }
 
@@ -40,6 +40,7 @@ export const getPulseDiff = (
   bpm,
   swing,
   pulsesPerPattern,
+  // TODO: Too many time types!
   stateStartTime,
   stateNow,
   contextCurrentTime,
