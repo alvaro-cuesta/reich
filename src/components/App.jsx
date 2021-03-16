@@ -8,6 +8,7 @@ import Oscillator from '../Oscillator'
 import useInputInteger from '../hooks/useInputInteger'
 import useInputFloat from '../hooks/useInputFloat'
 import useInputCheckbox from '../hooks/useInputCheckbox'
+import { getPosition } from '../business/tempo'
 
 const CLAP_PATTERN = [
   true,
@@ -71,38 +72,6 @@ const App = ({ context }) => {
     }))
   }, [])
 
-  const getPosition = useCallback(() => {
-    let startTime = state.startTime
-    let now = state.now
-
-    if (startTime === false) return {}
-
-    let totalBeats = (now - startTime) / secsPerBeat
-
-    let totalPulses =
-      Math.floor(totalBeats) * 2 +
-      ((1 + (totalBeats % 1)) % 1 < swing.value ? 0 : 1)
-
-    // console.log(totalPulses);
-
-    if (startTime >= now) {
-      let pulse = totalPulses
-      while (pulse < 0) pulse += CLAP_PATTERN.length
-
-      return {
-        pattern: Math.floor(totalPulses / CLAP_PATTERN.length),
-        pulse,
-        totalPulses,
-      }
-    }
-
-    return {
-      pattern: Math.floor(totalPulses / CLAP_PATTERN.length),
-      pulse: totalPulses % CLAP_PATTERN.length,
-      totalPulses,
-    }
-  }, [secsPerBeat, state.startTime, swing.value, state.now])
-
   const getPulseStart = useCallback(
     (totalPulses) => {
       let startTime = state.startTime
@@ -158,7 +127,13 @@ const App = ({ context }) => {
 
   // handleSound
   useEffect(() => {
-    let { pattern, pulse, totalPulses } = getPosition()
+    let { pattern, pulse, totalPulses } = getPosition(
+      tempo.value,
+      swing.value,
+      CLAP_PATTERN.length,
+      state.startTime,
+      state.now,
+    )
 
     if (pattern >= (CLAP_PATTERN.length + 1) * repeats.value) {
       handleStop()
@@ -186,7 +161,15 @@ const App = ({ context }) => {
     if (pattern >= (CLAP_PATTERN.length + 1) * repeats.value) return
 
     schedulePulseSound(pulse, pattern, totalPulses)
-  }, [getPosition, handleStop, schedulePulseSound, repeats.value])
+  }, [
+    handleStop,
+    schedulePulseSound,
+    repeats.value,
+    tempo.value,
+    swing.value,
+    state.startTime,
+    state.now,
+  ])
 
   // Playback methods
 
@@ -240,7 +223,13 @@ const App = ({ context }) => {
 
   const getPulseDiff = useCallback(
     (delta) => {
-      let { totalPulses } = getPosition()
+      let { totalPulses } = getPosition(
+        tempo.value,
+        swing.value,
+        CLAP_PATTERN.length,
+        state.startTime,
+        state.now,
+      )
 
       let now = context.currentTime - delta / 1000
 
@@ -255,7 +244,15 @@ const App = ({ context }) => {
         nextPulseDiff,
       }
     },
-    [getPosition, getPulseStart, secsPerBeat, context, swing.value],
+    [
+      getPulseStart,
+      secsPerBeat,
+      context,
+      tempo.value,
+      swing.value,
+      state.startTime,
+      state.now,
+    ],
   )
 
   useEffect(() => {
@@ -263,7 +260,13 @@ const App = ({ context }) => {
       if (repeat) return
 
       let userInput = state.userInput
-      let { pattern, pulse } = getPosition()
+      let { pattern, pulse } = getPosition(
+        tempo.value,
+        swing.value,
+        CLAP_PATTERN.length,
+        state.startTime,
+        state.now,
+      )
 
       let { currPulseDiff, nextPulseDiff } = getPulseDiff(
         performance.now() - timeStamp,
@@ -305,11 +308,24 @@ const App = ({ context }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown, false)
     }
-  }, [getPosition, getPulseDiff, state.userInput])
+  }, [
+    getPulseDiff,
+    state.userInput,
+    tempo.value,
+    swing.value,
+    state.startTime,
+    state.now,
+  ])
 
   // RENDER
 
-  let { pattern, pulse } = getPosition()
+  let { pattern, pulse } = getPosition(
+    tempo.value,
+    swing.value,
+    CLAP_PATTERN.length,
+    state.startTime,
+    state.now,
+  )
 
   let buttonHandler, buttonLabel
   if (pattern === undefined) {
