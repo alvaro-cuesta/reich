@@ -14,13 +14,6 @@ https://alvaro-cuesta.github.io/reich/
   yarn start
   ```
 
-- ...or accessible from anywhere (generally LAN and, if your ports are
-  forwarded, including the internet):
-
-  ```sh
-  yarn public
-  ```
-
 - Build the application in the `build/` directory:
 
   ```sh

@@ -1,8 +1,7 @@
 import React from 'react'
-import { hot } from 'react-hot-loader'
 
-import PatternTable from 'components/PatternTable'
-import Input from 'components/Input'
+import PatternTable from './PatternTable'
+import Input from './Input'
 
 import Oscillator from '../Oscillator'
 
@@ -410,4 +409,4 @@ class App extends React.PureComponent {
 
 App.propTypes = {}
 
-export default hot(module)(App)
+export default App

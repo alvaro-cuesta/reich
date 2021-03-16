@@ -4,7 +4,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 
-import ClapRow from 'components/ClapRow'
+import ClapRow from './ClapRow'
 
 const EMPTY_ROWS = 1
 const SCROLL_DURATION = 300
@@ -91,7 +91,9 @@ class PatternTable extends React.PureComponent {
           {Array.apply(null, { length: EMPTY_ROWS }).map((_, i) => (
             <ClapRow
               key={i}
-              ref={(e) => (this.rows[i] = ReactDOM.findDOMNode(e))}
+              ref={(e) => {
+                this.rows[i] = e
+              }}
               clapPattern={clapPattern}
               className="empty"
             />

@@ -21,3 +21,10 @@
   - Clap1 included game mode?
 
 - Custom pattern
+
+- Favicon
+- Restore GH deploy
+- Remove componentWillReceiveProps and componentWillMount
+- SharedArrayBuffer warning
+- AudioContext warning
+- Migrate to hooks

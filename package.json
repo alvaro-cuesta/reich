@@ -4,21 +4,16 @@
   "description": "Steven Reich's Clapping Music Trainer",
   "private": true,
   "scripts": {
-    "start": "webpack-serve --config webpack.config.js",
-    "public": "webpack-serve --config webpack.config.js",
-    "build": "webpack --env.colors --progress --profile --bail",
-    "build:gh-pages": "webpack --env.colors --progress --profile --bail",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "preversion": "yarn build",
-    "deploy": "yarn deploy:gh-pages",
-    "predeploy:gh-pages": "yarn build:gh-pages",
-    "deploy:gh-pages": "webpack-parts-deploy-gh-pages",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "echo \"Error: Not implemented\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "https://gihub.com/alvaro-cuesta/reich"
   },
-  "homepage": "https://github.com/alvaro-cuesta/reich#readme",
+  "homepage": ".",
   "bugs": "https://github.com/alvaro-cuesta/reich/issues",
   "keywords": [
     "reich",
@@ -31,18 +26,29 @@
     "url": "https://alvaro-cuesta.github.io/"
   },
   "license": "ISC",
-  "devDependencies": {
-    "@alvaro-cuesta/webpack-parts": "^0.12.2",
-    "react-hot-loader": "^4.3.8",
-    "webpack": "^4.19.0",
-    "webpack-cli": "^3.1.0",
-    "webpack-serve": "^2.0.2"
-  },
   "dependencies": {
-    "@babel/runtime": "^7.0.0",
-    "classnames": "^2.2.6",
-    "prop-types": "^15.6.2",
-    "react": "^16.5.1",
-    "react-dom": "^16.5.1"
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.3",
+    "sass": "^1.32.8",
+    "web-vitals": "^1.0.1"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
