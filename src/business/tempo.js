@@ -27,3 +27,11 @@ export const getPosition = (
     totalPulses,
   }
 }
+
+export const getPulseStart = (bpm, swing, contextStartTime, totalPulses) => {
+  const totalBeats =
+    Math.floor(totalPulses / PULSES_PER_BEAT) +
+    (totalPulses % PULSES_PER_BEAT === 0 ? 0 : swing)
+
+  return contextStartTime + totalBeats * getSecsPerBeat(bpm)
+}

@@ -8,7 +8,7 @@ import Oscillator from '../Oscillator'
 import useInputInteger from '../hooks/useInputInteger'
 import useInputFloat from '../hooks/useInputFloat'
 import useInputCheckbox from '../hooks/useInputCheckbox'
-import { getPosition } from '../business/tempo'
+import { getPosition, getPulseStart } from '../business/tempo'
 
 const CLAP_PATTERN = [
   true,
@@ -72,21 +72,14 @@ const App = ({ context }) => {
     }))
   }, [])
 
-  const getPulseStart = useCallback(
-    (totalPulses) => {
-      let startTime = state.startTime
-
-      let totalBeats =
-        Math.floor(totalPulses / 2) + (totalPulses % 2 === 0 ? 0 : swing.value)
-
-      return startTime + totalBeats * secsPerBeat
-    },
-    [secsPerBeat, state.startTime, swing.value],
-  )
-
   const schedulePulseSound = useCallback(
     (pulse, pattern, totalPulses, instant) => {
-      let pulseStart = getPulseStart(totalPulses)
+      let pulseStart = getPulseStart(
+        tempo.value,
+        swing.value,
+        state.startTime,
+        totalPulses,
+      )
       let pulseEnd = pulseStart + CLAP_LENGTH
       let gain = pulse === 0 ? ACCENT_GAIN : GAIN
 
@@ -116,12 +109,14 @@ const App = ({ context }) => {
       }
     },
     [
-      getPulseStart,
       clap1.checked,
       clap2.checked,
       metronome.checked,
       countMetronome.checked,
       repeats.value,
+      state.startTime,
+      swing.value,
+      tempo.value,
     ],
   )
 
@@ -234,9 +229,22 @@ const App = ({ context }) => {
       let now = context.currentTime - delta / 1000
 
       let currPulseDiff =
-        (now - getPulseStart(totalPulses)) / (secsPerBeat * swing.value)
+        (now -
+          getPulseStart(
+            tempo.value,
+            swing.value,
+            state.startTime,
+            totalPulses,
+          )) /
+        (secsPerBeat * swing.value)
       let nextPulseDiff =
-        (getPulseStart(totalPulses + 1) - now) /
+        (getPulseStart(
+          tempo.value,
+          swing.value,
+          state.startTime,
+          totalPulses + 1,
+        ) -
+          now) /
         (secsPerBeat * (1 - swing.value))
 
       return {
@@ -245,7 +253,6 @@ const App = ({ context }) => {
       }
     },
     [
-      getPulseStart,
       secsPerBeat,
       context,
       tempo.value,
