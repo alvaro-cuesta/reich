@@ -43,8 +43,9 @@ const App = ({ context }) => {
   const [state, setState] = useState({
     startTime: null,
     now: null,
-    userInput: [],
   })
+
+  const [userInput, setUserInput] = useState([])
 
   const tempo = useInputInteger('tempo', { min: 1, max: 999, step: 1 }, 120)
   const repeats = useInputInteger('repeats', { min: 1, max: 999, step: 1 }, 4)
@@ -70,11 +71,10 @@ const App = ({ context }) => {
     clap2Ref.current.cancelScheduledValues()
     metronomeRef.current.cancelScheduledValues()
 
-    setState((state) => ({
-      ...state,
+    setState({
       startTime: null,
       now: null,
-    }))
+    })
   }, [])
 
   const schedulePulseSound = useCallback(
@@ -187,19 +187,22 @@ const App = ({ context }) => {
 
       lastPulseRef.current = null
 
-      setState((state) => ({
-        ...state,
+      setState({
         startTime: now + (secsPerBeat / 2) * CLAP_PATTERN.length,
         now: now,
-        userInput: [],
-      }))
+      })
+
+      setUserInput([])
 
       if (countMetronome.checked) {
         metronomeRef.current.schedule(ACCENT_GAIN, now, now + CLAP_LENGTH)
       }
 
       timeIntervalRef.current = setInterval(() => {
-        setState((state) => ({ ...state, now: context.currentTime }))
+        setState((state) => ({
+          startTime: state.startTime,
+          now: context.currentTime,
+        }))
       }, 1)
     },
     [context, secsPerBeat, countMetronome.checked],
@@ -225,7 +228,6 @@ const App = ({ context }) => {
     const handleKeyDown = ({ repeat, key, keyCode, timeStamp }) => {
       if (repeat) return
 
-      let userInput = state.userInput
       let { pattern, pulse } = getPosition(
         tempo.value,
         swing.value,
@@ -247,27 +249,29 @@ const App = ({ context }) => {
       if (CLAP1_KEYS.includes(keyCode)) {
         console.log('clap1', currPulseDiff, nextPulseDiff)
 
-        if (userInput[pattern] === undefined) {
-          userInput[pattern] = []
-        }
-
-        if (currPulseDiff < nextPulseDiff) {
-          userInput[pattern][pulse] = currPulseDiff
-        } else {
-          pulse += 1
-          if (pulse === CLAP_PATTERN.length) {
-            pulse = 0
-            pattern += 1
-
-            if (userInput[pattern] === undefined) {
-              userInput[pattern] = []
-            }
+        setUserInput((userInput) => {
+          if (userInput[pattern] === undefined) {
+            userInput[pattern] = []
           }
 
-          userInput[pattern][pulse] = nextPulseDiff
-        }
+          if (currPulseDiff < nextPulseDiff) {
+            userInput[pattern][pulse] = currPulseDiff
+          } else {
+            pulse += 1
+            if (pulse === CLAP_PATTERN.length) {
+              pulse = 0
+              pattern += 1
 
-        setState((state) => ({ ...state, userInput }))
+              if (userInput[pattern] === undefined) {
+                userInput[pattern] = []
+              }
+            }
+
+            userInput[pattern][pulse] = nextPulseDiff
+          }
+
+          return userInput
+        })
       } else if (CLAP2_KEYS.includes(keyCode)) {
         console.log('clap2', currPulseDiff, nextPulseDiff)
       } else {
@@ -280,14 +284,7 @@ const App = ({ context }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown, false)
     }
-  }, [
-    state.userInput,
-    tempo.value,
-    swing.value,
-    state.startTime,
-    state.now,
-    context,
-  ])
+  }, [tempo.value, swing.value, state.startTime, state.now, context])
 
   // RENDER
 
@@ -336,7 +333,7 @@ const App = ({ context }) => {
         pattern={pattern}
         pulse={pulse}
         repeats={repeats.value}
-        userInput={state.userInput}
+        userInput={userInput}
       />
     </div>
   )
