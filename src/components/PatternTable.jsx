@@ -39,11 +39,15 @@ const PatternTable = ({
     )
   }, [])
 
+  const patternRowsLength = (clapPattern.length + 1) * repeats
+
   useEffect(() => {
     if (originalPattern !== undefined) {
-      scrollToPattern(originalPattern <= 0 ? 0 : originalPattern)
+      scrollToPattern(
+        Math.max(0, Math.min(patternRowsLength - 1, originalPattern)),
+      )
     }
-  }, [originalPattern, scrollToPattern])
+  }, [originalPattern, scrollToPattern, patternRowsLength])
 
   return (
     <div
@@ -77,34 +81,36 @@ const PatternTable = ({
       </div>
 
       <div className="pattern-clap2">
-        {Array.apply(null, { length: EMPTY_ROWS }).map((_, i) => (
-          <ClapRow
-            key={i}
-            ref={(e) => {
-              rowsRef.current[i] = e
-            }}
-            clapPattern={clapPattern}
-            className="empty"
-          />
-        ))}
-        {Array.apply(null, {
-          length: (clapPattern.length + 1) * repeats,
-        }).map((_, i) => (
-          <ClapRow
-            key={i}
-            ref={(e) => {
-              rowsRef.current[i + EMPTY_ROWS] = e
-            }}
-            clapPattern={clapPattern}
-            className={i === pattern ? 'highlight' : ''}
-            highlightPulse={i === pattern ? pulse : undefined}
-            head={i === pattern ? 'Clap 2 ➡' : ''}
-            shift={Math.floor(i / repeats)}
-            userInput={userInput[i]}
-            donePattern={i < originalPattern}
-            currentPattern={i === originalPattern}
-          />
-        ))}
+        {Array(EMPTY_ROWS)
+          .fill()
+          .map((_, i) => (
+            <ClapRow
+              key={i}
+              ref={(e) => {
+                rowsRef.current[i] = e
+              }}
+              clapPattern={clapPattern}
+              className="empty"
+            />
+          ))}
+        {Array(patternRowsLength)
+          .fill()
+          .map((_, i) => (
+            <ClapRow
+              key={i}
+              ref={(e) => {
+                rowsRef.current[i + EMPTY_ROWS] = e
+              }}
+              clapPattern={clapPattern}
+              className={i === pattern ? 'highlight' : ''}
+              highlightPulse={i === pattern ? pulse : undefined}
+              head={i === pattern ? 'Clap 2 ➡' : ''}
+              shift={Math.floor(i / repeats)}
+              userInput={userInput[i]}
+              donePattern={i < originalPattern}
+              currentPattern={i === originalPattern}
+            />
+          ))}
         <div className="padder">
           <div className="head" />
           <div className="pattern empty">
