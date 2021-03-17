@@ -14,6 +14,7 @@ import {
   getPulseStart,
   getSecsPerBeat,
 } from '../business/tempo'
+import { mathMod } from '../business/util'
 
 const CLAP_PATTERN = [
   true,
@@ -77,8 +78,8 @@ const App = ({ context }) => {
 
   const schedulePulseSound = useCallback(
     (totalPulses) => {
-      const pulse = totalPulses % CLAP_PATTERN.length
       const pattern = Math.floor(totalPulses / CLAP_PATTERN.length)
+      const pulse = mathMod(totalPulses, CLAP_PATTERN.length)
 
       const pulseStart = getPulseStart(
         tempo.value,
@@ -230,13 +231,17 @@ const App = ({ context }) => {
     const handleKeyDown = ({ repeat, key, keyCode, timeStamp }) => {
       if (repeat) return
 
-      const { pattern, pulse } = getPosition(
+      const { totalPulses } = getPosition(
         tempo.value,
         swing.value,
         CLAP_PATTERN.length,
         state.startTime,
         context.currentTime,
       )
+
+      if (totalPulses === undefined) {
+        return
+      }
 
       const eventTimeFix = (performance.now() - timeStamp) / 1000
 
@@ -252,27 +257,17 @@ const App = ({ context }) => {
         console.log('clap1', currPulseDiff, nextPulseDiff)
 
         setUserInput((userInput) => {
-          if (userInput[pattern] === undefined) {
-            userInput[pattern] = []
-          }
+          const hitTotalPulses =
+            totalPulses + (currPulseDiff >= nextPulseDiff ? 1 : 0)
+          const hitPulseDiff =
+            currPulseDiff >= nextPulseDiff ? nextPulseDiff : currPulseDiff
 
-          if (currPulseDiff < nextPulseDiff) {
-            userInput[pattern][pulse] = currPulseDiff
-          } else {
-            let actualPulse = pulse + 1
-            let actualPattern = pattern
+          const pattern = Math.floor(hitTotalPulses / CLAP_PATTERN.length)
+          const pulse = mathMod(hitTotalPulses, CLAP_PATTERN.length)
 
-            if (actualPulse === CLAP_PATTERN.length) {
-              actualPulse = 0
-              actualPattern += 1
-
-              if (userInput[actualPattern] === undefined) {
-                userInput[actualPattern] = []
-              }
-            }
-
-            userInput[actualPattern][actualPulse] = nextPulseDiff
-          }
+          userInput = [...userInput]
+          userInput[pattern] = [...(userInput[pattern] || [])]
+          userInput[pattern][pulse] = hitPulseDiff
 
           return userInput
         })
