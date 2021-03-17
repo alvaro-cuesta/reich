@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/reich/static/css/main.da9c2ca5.chunk.css",
-    "main.js": "/reich/static/js/main.cde338bf.chunk.js",
-    "main.js.map": "/reich/static/js/main.cde338bf.chunk.js.map",
-    "runtime-main.js": "/reich/static/js/runtime-main.9b8d71b6.js",
-    "runtime-main.js.map": "/reich/static/js/runtime-main.9b8d71b6.js.map",
-    "static/js/2.5bddd519.chunk.js": "/reich/static/js/2.5bddd519.chunk.js",
-    "static/js/2.5bddd519.chunk.js.map": "/reich/static/js/2.5bddd519.chunk.js.map",
-    "static/js/3.4cfccf62.chunk.js": "/reich/static/js/3.4cfccf62.chunk.js",
-    "static/js/3.4cfccf62.chunk.js.map": "/reich/static/js/3.4cfccf62.chunk.js.map",
+    "main.js": "/reich/static/js/main.2cb0df20.chunk.js",
+    "main.js.map": "/reich/static/js/main.2cb0df20.chunk.js.map",
+    "runtime-main.js": "/reich/static/js/runtime-main.9d41a284.js",
+    "runtime-main.js.map": "/reich/static/js/runtime-main.9d41a284.js.map",
+    "static/js/2.746af1d6.chunk.js": "/reich/static/js/2.746af1d6.chunk.js",
+    "static/js/2.746af1d6.chunk.js.map": "/reich/static/js/2.746af1d6.chunk.js.map",
+    "static/js/3.ba0b580a.chunk.js": "/reich/static/js/3.ba0b580a.chunk.js",
+    "static/js/3.ba0b580a.chunk.js.map": "/reich/static/js/3.ba0b580a.chunk.js.map",
     "index.html": "/reich/index.html",
     "static/css/main.da9c2ca5.chunk.css.map": "/reich/static/css/main.da9c2ca5.chunk.css.map",
-    "static/js/2.5bddd519.chunk.js.LICENSE.txt": "/reich/static/js/2.5bddd519.chunk.js.LICENSE.txt"
+    "static/js/2.746af1d6.chunk.js.LICENSE.txt": "/reich/static/js/2.746af1d6.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.9b8d71b6.js",
-    "static/js/2.5bddd519.chunk.js",
+    "static/js/runtime-main.9d41a284.js",
+    "static/js/2.746af1d6.chunk.js",
     "static/css/main.da9c2ca5.chunk.css",
-    "static/js/main.cde338bf.chunk.js"
+    "static/js/main.2cb0df20.chunk.js"
   ]
 }
