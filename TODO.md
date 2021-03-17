@@ -16,15 +16,14 @@
   - FIX: why there's no hit-bad ever?
   - HACK: timeStamp on event assumes DOMHighresTimeStamp which might not be available in all browsers https://developers.google.com/web/updates/2016/01/high-res-timestamps
   - Option to disable colors until end (no-distraction)
-  - Mobile clicking?
-  - Statistics of fails etc.
-  - Clap1 included game mode?
+  - Mobile clicking
+  - Statistics of fails etc. at game end
+  - Clap1 included game mode? Interesting for duet or solo duet.
+  - Audio tapping
 
 - Custom pattern
 
 - Favicon
-- Restore GH deploy
-- Remove componentWillReceiveProps and componentWillMount
-- SharedArrayBuffer warning
-- AudioContext warning
 - Migrate to hooks
+- Yellow/green on low bpms is obviously bad
+- CSS
