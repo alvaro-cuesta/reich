@@ -8,6 +8,7 @@ import ClapRow from './ClapRow'
 const EMPTY_ROWS = 1
 const SCROLL_DURATION = 300
 const SCROLL_EASING = easeOutSine
+const OVERSCROLL_PX = 4
 
 const PatternTable = ({
   buttonHandler,
@@ -29,22 +30,13 @@ const PatternTable = ({
   const scrollToPattern = useCallback((i) => {
     smoothScroll(
       document.scrollingElement,
-      rowsRef.current[i].offsetTop -
+      rowsRef.current[EMPTY_ROWS + i].offsetTop -
+        rowsRef.current[EMPTY_ROWS].offsetTop +
         scrollAnchorRef.current.offsetTop +
-        rowsRef.current[i].offsetHeight -
-        /* HACK */ 4,
+        OVERSCROLL_PX,
       SCROLL_DURATION,
       SCROLL_EASING,
     )
-  }, [])
-
-  // TODO: What does this do?
-  useEffect(() => {
-    scrollAnchorRef.current.scrollTop =
-      rowsRef.current[0] -
-      scrollAnchorRef.current.offsetTop +
-      rowsRef.current[0].offsetHeight -
-      4
   }, [])
 
   useEffect(() => {
