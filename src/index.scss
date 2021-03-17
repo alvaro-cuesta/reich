@@ -21,6 +21,14 @@ button {
   background-color: nth($palette, 1);
 }
 
+a {
+  color: nth($palette, 7);
+
+  &:hover, &:active {
+    color: nth($palette, 8);
+  }
+}
+
 label {
   display: flex;
   align-items: baseline;

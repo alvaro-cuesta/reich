@@ -313,31 +313,91 @@ const App = ({ context }) => {
 
   return (
     <div className="reich-app">
-      <div className="controls">
-        <fieldset className="tempo">
-          <Input label="Tempo:" {...tempo} />
-          <Input label="Repeats:" {...repeats} />
-          <Input label="Swing:" {...swing} />
-        </fieldset>
+      <header>
+        <h1>
+          <a href={process.env.PUBLIC_URL}>Reich Clapping Trainer</a>
+        </h1>
+      </header>
 
-        <fieldset>
-          <div className="noselect">Sounds:</div>
-          <Input label="Clap 1" {...clap1} />
-          <Input label="Clap 2" {...clap2} />
-          <Input label="Metronome" {...metronome} />
-          <Input label="Count" {...countMetronome} />
-        </fieldset>
-      </div>
+      <section>
+        <p>
+          <a
+            href="https://en.wikipedia.org/wiki/Clapping_Music"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Clapping Music
+          </a>{' '}
+          is a minimalist piece written by{' '}
+          <a
+            href="https://en.wikipedia.org/wiki/Steve_Reich"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Steve Reich
+          </a>
+          . It is written for two performers and is performed entirely by
+          clapping.
+        </p>
+        <p>
+          For a live example, watch the{' '}
+          <a
+            href="https://www.youtube.com/watch?v=liYkRarIDfo"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            video performed by London Sinfonietta percussionists
+          </a>{' '}
+          David Hockings and Toby Kearney.
+        </p>
+        <p>
+          Developed by{' '}
+          <a href="https://github.com/alvaro-cuesta/">Álvaro Cuesta</a>. Code
+          available on{' '}
+          <a href="https://github.com/alvaro-cuesta/reich">GitHub</a>.
+        </p>
+      </section>
 
-      <PatternTable
-        buttonHandler={buttonHandler}
-        buttonLabel={buttonLabel}
-        clapPattern={CLAP_PATTERN}
-        pattern={pattern}
-        pulse={pulse}
-        repeats={repeats.value}
-        userInput={userInput}
-      />
+      <section>
+        <h2>Instructions</h2>
+
+        <p>
+          Press "START" and wait for the initial count to 6, then clap as "Clap
+          2" by pressing "Z" in your keyboard.
+        </p>
+      </section>
+
+      <section>
+        <h2>Settings</h2>
+
+        <div className="controls">
+          <fieldset className="tempo">
+            <Input label="Tempo:" {...tempo} />
+            <Input label="Repeats:" {...repeats} />
+            <Input label="Swing:" {...swing} />
+          </fieldset>
+
+          <fieldset>
+            <div className="noselect">Sounds:</div>
+            <Input label="Clap 1" {...clap1} />
+            <Input label="Clap 2" {...clap2} />
+            <Input label="Metronome" {...metronome} />
+            <Input label="Count" {...countMetronome} />
+          </fieldset>
+        </div>
+      </section>
+
+      <main>
+        <PatternTable
+          buttonHandler={buttonHandler}
+          buttonLabel={buttonLabel}
+          clapPattern={CLAP_PATTERN}
+          pattern={pattern}
+          pulse={pulse}
+          repeats={repeats.value}
+          userInput={userInput}
+        />
+      </main>
     </div>
   )
 }
