@@ -23,7 +23,6 @@
 
 - Custom pattern
 
-- Favicon
 - Migrate to hooks
 - Yellow/green on low bpms is obviously bad
 - CSS
