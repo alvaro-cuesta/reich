@@ -9,10 +9,10 @@ import useInputInteger from '../hooks/useInputInteger'
 import useInputFloat from '../hooks/useInputFloat'
 import useInputCheckbox from '../hooks/useInputCheckbox'
 import {
-  getPosition,
   getPulseDiff,
   getPulseStart,
   getSecsPerBeat,
+  getTotalPulses,
 } from '../business/tempo'
 import { mathMod } from '../business/util'
 
@@ -129,12 +129,13 @@ const App = ({ context }) => {
 
   // handleSound
   useEffect(() => {
-    if (state.startTime === null) return
+    if (state.startTime === null) {
+      return
+    }
 
-    const { totalPulses } = getPosition(
+    const totalPulses = getTotalPulses(
       tempo.value,
       swing.value,
-      CLAP_PATTERN.length,
       state.startTime,
       state.now,
     )
@@ -229,26 +230,26 @@ const App = ({ context }) => {
 
   useEffect(() => {
     const handleKeyDown = ({ repeat, key, keyCode, timeStamp }) => {
-      if (repeat) return
+      if (repeat) {
+        return
+      }
 
-      const { totalPulses } = getPosition(
+      if (state.startTime === null) {
+        return
+      }
+
+      const totalPulses = getTotalPulses(
         tempo.value,
         swing.value,
-        CLAP_PATTERN.length,
         state.startTime,
         context.currentTime,
       )
-
-      if (totalPulses === undefined) {
-        return
-      }
 
       const eventTimeFix = (performance.now() - timeStamp) / 1000
 
       const { currPulseDiff, nextPulseDiff } = getPulseDiff(
         tempo.value,
         swing.value,
-        CLAP_PATTERN.length,
         state.startTime,
         context.currentTime - eventTimeFix,
       )
@@ -287,13 +288,18 @@ const App = ({ context }) => {
 
   // RENDER
 
-  const { pattern, pulse } = getPosition(
-    tempo.value,
-    swing.value,
-    CLAP_PATTERN.length,
-    state.startTime,
-    context.currentTime,
-  )
+  let pattern, pulse
+  if (state.startTime !== null) {
+    const totalPulses = getTotalPulses(
+      tempo.value,
+      swing.value,
+      state.startTime,
+      context.currentTime,
+    )
+
+    pattern = Math.floor(totalPulses / CLAP_PATTERN.length)
+    pulse = mathMod(totalPulses, CLAP_PATTERN.length)
+  }
 
   let buttonHandler, buttonLabel
   if (pattern === undefined) {

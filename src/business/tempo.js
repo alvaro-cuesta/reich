@@ -4,28 +4,14 @@ const PULSES_PER_BEAT = 2
 
 export const getSecsPerBeat = (bpm) => 60 / bpm
 
-export const getPosition = (
-  bpm,
-  swing,
-  pulsesPerPattern,
-  startTime,
-  currentTime,
-) => {
-  if (startTime === null) {
-    return {}
-  }
-
+export const getTotalPulses = (bpm, swing, startTime, currentTime) => {
   const totalBeats = (currentTime - startTime) / getSecsPerBeat(bpm)
 
   const totalPulses =
     Math.floor(totalBeats) * PULSES_PER_BEAT +
     (mathMod(totalBeats, 1) < swing ? 0 : 1)
 
-  return {
-    pattern: Math.floor(totalPulses / pulsesPerPattern),
-    pulse: mathMod(totalPulses, pulsesPerPattern),
-    totalPulses,
-  }
+  return totalPulses
 }
 
 export const getPulseStart = (bpm, swing, startTime, totalPulses) => {
@@ -36,20 +22,8 @@ export const getPulseStart = (bpm, swing, startTime, totalPulses) => {
   return startTime + totalBeats * getSecsPerBeat(bpm)
 }
 
-export const getPulseDiff = (
-  bpm,
-  swing,
-  pulsesPerPattern,
-  startTime,
-  currentTime,
-) => {
-  const { totalPulses } = getPosition(
-    bpm,
-    swing,
-    pulsesPerPattern,
-    startTime,
-    currentTime,
-  )
+export const getPulseDiff = (bpm, swing, startTime, currentTime) => {
+  const totalPulses = getTotalPulses(bpm, swing, startTime, currentTime)
 
   const secsPerBeat = getSecsPerBeat(bpm)
 
