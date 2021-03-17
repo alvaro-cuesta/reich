@@ -76,7 +76,10 @@ const App = ({ context }) => {
   }, [])
 
   const schedulePulseSound = useCallback(
-    (pulse, pattern, totalPulses, instant) => {
+    (totalPulses) => {
+      const pulse = totalPulses % CLAP_PATTERN.length
+      const pattern = Math.floor(totalPulses / CLAP_PATTERN.length)
+
       const pulseStart = getPulseStart(
         tempo.value,
         swing.value,
@@ -125,7 +128,9 @@ const App = ({ context }) => {
 
   // handleSound
   useEffect(() => {
-    const { pattern, pulse, totalPulses } = getPosition(
+    if (state.startTime === null) return
+
+    const { totalPulses } = getPosition(
       tempo.value,
       swing.value,
       CLAP_PATTERN.length,
@@ -133,34 +138,30 @@ const App = ({ context }) => {
       state.now,
     )
 
-    if (pattern >= (CLAP_PATTERN.length + 1) * repeats.value) {
+    const maxPulses =
+      (CLAP_PATTERN.length + 1) * repeats.value * CLAP_PATTERN.length
+
+    // After last pulse, auto stop
+    if (totalPulses >= maxPulses) {
       handleStop()
       return
     }
 
-    if (lastPulseRef.current === null) {
-      // Just started: schedfule first pulse
-      lastPulseRef.current = 0
-    } else {
-      if (pulse === lastPulseRef.current) return
-      lastPulseRef.current = pulse
+    // Pulse already scheduled, bail out
+    if (totalPulses === lastPulseRef.current) {
+      return
     }
+
+    lastPulseRef.current = totalPulses
 
     // Schedule _next_ pulse
+    const nextPulse = totalPulses + 1
 
-    let schedulePulse = pulse
-    let schedulePattern = pattern
-
-    schedulePulse += 1
-
-    if (schedulePulse === CLAP_PATTERN.length) {
-      schedulePulse = 0
-      schedulePattern += 1
+    if (nextPulse >= maxPulses) {
+      return
     }
 
-    if (pattern >= (CLAP_PATTERN.length + 1) * repeats.value) return
-
-    schedulePulseSound(schedulePulse, schedulePattern, totalPulses + 1)
+    schedulePulseSound(totalPulses + 1)
   }, [
     handleStop,
     schedulePulseSound,
