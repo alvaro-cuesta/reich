@@ -3,17 +3,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import PatternTable from './PatternTable'
 import Input from './Input'
 
-import Oscillator from '../Oscillator'
+import ClapAudio from '../business/ClapAudio'
 
 import useInputInteger from '../hooks/useInputInteger'
 import useInputFloat from '../hooks/useInputFloat'
 import useInputCheckbox from '../hooks/useInputCheckbox'
-import {
-  getPulseDiff,
-  getPulseStart,
-  getSecsPerBeat,
-  getTotalPulses,
-} from '../business/tempo'
+import { getPulseDiff, getTotalPulses } from '../business/tempo'
 import { mathMod } from '../business/util'
 
 const CLAP_PATTERN = [
@@ -30,13 +25,6 @@ const CLAP_PATTERN = [
   true,
   false,
 ]
-const CLAP_LENGTH = 0.0125
-const CLAP1_F = 440
-const CLAP2_F = 230
-const METRONOME_F = 890
-const METRONOME_ACCENT_F = 1780
-const ACCENT_GAIN = 1
-const GAIN = 0.25
 const CLAP1_KEYS = [90]
 const CLAP2_KEYS = [77]
 
@@ -56,175 +44,72 @@ const App = ({ context }) => {
   const metronome = useInputCheckbox('metronome', false)
   const countMetronome = useInputCheckbox('countMetronome', true)
 
-  const clap1Ref = useRef(null)
-  const clap2Ref = useRef(null)
-  const metronomeRef = useRef(null)
-  const timeIntervalRef = useRef(null)
-  const lastPulseRef = useRef(null)
-  const timeStampRef = useRef(null)
+  const clapAudioRef = useRef()
 
-  const handleStop = useCallback(() => {
-    clearInterval(timeIntervalRef.current)
-
-    clap1Ref.current.cancelScheduledValues()
-    clap2Ref.current.cancelScheduledValues()
-    metronomeRef.current.cancelScheduledValues()
-
-    setState({
-      startTime: null,
-      now: null,
-    })
+  const handleStart = useCallback(() => {
+    clapAudioRef.current.start()
+    setUserInput([])
   }, [])
 
-  const schedulePulseSound = useCallback(
-    (totalPulses) => {
-      const pattern = Math.floor(totalPulses / CLAP_PATTERN.length)
-      const pulse = mathMod(totalPulses, CLAP_PATTERN.length)
+  const handleStop = useCallback(() => {
+    clapAudioRef.current.stop()
+  }, [])
 
-      const pulseStart = getPulseStart(
-        tempo.value,
-        swing.value,
-        state.startTime,
-        totalPulses,
-      )
-      const pulseEnd = pulseStart + CLAP_LENGTH
-      const gain = pulse === 0 ? ACCENT_GAIN : GAIN
+  // TODO: Propagate states to ref
 
-      if (pattern >= 0) {
-        if (clap1.checked && CLAP_PATTERN[pulse % CLAP_PATTERN.length]) {
-          clap1Ref.current.schedule(gain, pulseStart, pulseEnd)
-        }
-
-        const shift = Math.floor(pattern / repeats.value)
-        if (
-          clap2.checked &&
-          CLAP_PATTERN[(shift + pulse) % CLAP_PATTERN.length]
-        ) {
-          clap2Ref.current.schedule(gain, pulseStart, pulseEnd)
-        }
-      }
-
-      const isMetronome = metronome.checked && pattern >= 0 && pulse % 2 === 0
-      const isCountMetronome =
-        countMetronome.checked && pattern === -1 && pulse % 2 === 0
-      if (isMetronome || isCountMetronome) {
-        metronomeRef.current.scheduleFrequency(
-          pulse === 0 ? METRONOME_ACCENT_F : METRONOME_F,
-          pulseStart,
-        )
-        metronomeRef.current.schedule(gain, pulseStart, pulseEnd)
-      }
-    },
-    [
+  useEffect(() => {
+    clapAudioRef.current = new ClapAudio(
+      context,
+      CLAP_PATTERN,
+      tempo.value,
+      repeats.value,
+      swing.value,
       clap1.checked,
       clap2.checked,
       metronome.checked,
       countMetronome.checked,
-      repeats.value,
-      state.startTime,
-      swing.value,
-      tempo.value,
-    ],
-  )
-
-  // handleSound
-  useEffect(() => {
-    if (state.startTime === null) {
-      return
-    }
-
-    const totalPulses = getTotalPulses(
-      tempo.value,
-      swing.value,
-      state.startTime,
-      state.now,
+      (startTime, now) => {
+        setState({ startTime, now })
+      },
     )
 
-    const maxPulses =
-      (CLAP_PATTERN.length + 1) * repeats.value * CLAP_PATTERN.length
-
-    // After last pulse, auto stop
-    if (totalPulses >= maxPulses) {
-      handleStop()
-      return
+    return () => {
+      clapAudioRef.current.destroy()
     }
 
-    // Pulse already scheduled, bail out
-    if (totalPulses === lastPulseRef.current) {
-      return
-    }
+    // HACK? We just want the initial values for the clap audio
+    //       See below for how we synchronize
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [context])
 
-    lastPulseRef.current = totalPulses
-
-    // Schedule _next_ pulse
-    const nextPulse = totalPulses + 1
-
-    if (nextPulse >= maxPulses) {
-      return
-    }
-
-    schedulePulseSound(totalPulses + 1)
-  }, [
-    handleStop,
-    schedulePulseSound,
-    repeats.value,
-    tempo.value,
-    swing.value,
-    state.startTime,
-    state.now,
-  ])
-
-  // Playback methods
-
-  const handleStart = useCallback(
-    ({ timeStamp }) => {
-      context.resume()
-
-      const now = context.currentTime
-
-      clap1Ref.current.cancelScheduledValues()
-      clap2Ref.current.cancelScheduledValues()
-      metronomeRef.current.cancelScheduledValues()
-
-      timeStampRef.current = timeStamp
-
-      lastPulseRef.current = null
-
-      setState({
-        startTime:
-          now + (getSecsPerBeat(tempo.value) / 2) * CLAP_PATTERN.length,
-        now: now,
-      })
-
-      setUserInput([])
-
-      if (countMetronome.checked) {
-        metronomeRef.current.schedule(ACCENT_GAIN, now, now + CLAP_LENGTH)
-      }
-
-      timeIntervalRef.current = setInterval(() => {
-        setState((state) => ({
-          startTime: state.startTime,
-          now: context.currentTime,
-        }))
-      }, 1)
-    },
-    [context, tempo.value, countMetronome.checked],
-  )
+  // HACK? This should probably be part of the `onChange` handlers
+  useEffect(() => {
+    clapAudioRef.current.bpm = tempo.value
+  }, [tempo.value])
 
   useEffect(() => {
-    clap1Ref.current = new Oscillator(context, CLAP1_F)
-    clap2Ref.current = new Oscillator(context, CLAP2_F)
-    metronomeRef.current = new Oscillator(context, METRONOME_ACCENT_F)
+    clapAudioRef.current.repeats = repeats.value
+  }, [repeats.value])
 
-    return () => {
-      handleStop()
+  useEffect(() => {
+    clapAudioRef.current.swing = swing.value
+  }, [swing.value])
 
-      clap1Ref.current.disconnect()
-      clap2Ref.current.disconnect()
-      metronomeRef.current.disconnect()
-    }
-  }, [context, handleStop])
+  useEffect(() => {
+    clapAudioRef.current.clap1 = clap1.checked
+  }, [clap1.checked])
+
+  useEffect(() => {
+    clapAudioRef.current.clap2 = clap2.checked
+  }, [clap2.checked])
+
+  useEffect(() => {
+    clapAudioRef.current.metronome = metronome.checked
+  }, [metronome.checked])
+
+  useEffect(() => {
+    clapAudioRef.current.countMetronome = countMetronome.checked
+  }, [countMetronome.checked])
 
   //
 
