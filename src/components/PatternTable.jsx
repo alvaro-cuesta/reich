@@ -25,7 +25,6 @@ const PatternTable = ({
 
   const rowsRef = useRef([])
   const scrollAnchorRef = useRef(null)
-  const isFirstRenderRef = useRef(true)
 
   const scrollToPattern = useCallback((i) => {
     smoothScroll(
@@ -49,12 +48,10 @@ const PatternTable = ({
   }, [])
 
   useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false
-    } else {
-      scrollToPattern(pattern === undefined || pattern <= 0 ? 0 : pattern)
+    if (originalPattern !== undefined) {
+      scrollToPattern(originalPattern <= 0 ? 0 : originalPattern)
     }
-  }, [pattern, scrollToPattern])
+  }, [originalPattern, scrollToPattern])
 
   return (
     <div
