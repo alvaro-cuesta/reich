@@ -7,13 +7,13 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "preversion": "yarn build",
-    "deploy": "echo reich.kaod.me > ./build/CNAME && cross-var gh-pages -d build -m \"v$npm_package_version\""
+    "deploy": "echo reich.cuesta.dev > ./build/CNAME && cross-var gh-pages -d build -m \"v$npm_package_version\""
   },
   "repository": {
     "type": "git",
     "url": "https://gihub.com/alvaro-cuesta/reich"
   },
-  "homepage": "https://reich.kaod.me",
+  "homepage": "https://reich.cuesta.dev",
   "bugs": "https://github.com/alvaro-cuesta/reich/issues",
   "keywords": [
     "reich",
